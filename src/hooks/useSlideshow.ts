@@ -46,3 +46,15 @@ export function useSlideshow(totalSections: number) {
         window.addEventListener("wheel", onWheel, { passive: false });
         window.addEventListener("touchstart", onTouchStart, { passive: true });
         window.addEventListener("touchend", onTouchEnd, { passive: true });
+        window.addEventListener("keydown", onKeyDown);
+
+        return () => {
+            window.removeEventListener("wheel", onWheel);
+            window.removeEventListener("touchstart", onTouchStart);
+            window.removeEventListener("touchend", onTouchEnd);
+            window.removeEventListener("keydown", onKeyDown);
+        };
+    }, [handleWheel, totalSections]);
+
+    return { activeSection, setActiveSection };
+}
