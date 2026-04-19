@@ -1,0 +1,1683 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Cosmos - Cinematic Journey</title>
+    <!-- Combined Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;700&family=Quicksand:wght@300;500;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* =========================================================
+           GLOBAL FRAMEWORK & SLIDESHOW TRANSITIONS
+           ========================================================= */
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #000;
+            overflow: hidden; /* No scrolling, pure slideshow */
+            font-family: 'Quicksand', sans-serif;
+            color: white;
+        }
+
+        .section {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 1.5s ease-in-out;
+            background-color: transparent;
+            z-index: 1;
+        }
+        
+        .section.active {
+            opacity: 1;
+            pointer-events: auto;
+            z-index: 10;
+        }
+
+        canvas { display: block; width: 100%; height: 100%; }
+
+        /* --- SUBTLE SCENE NAVIGATOR --- */
+        #scene-navigator {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 60px;
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.8) 0%, transparent 100%);
+            opacity: 0; 
+            transition: opacity 0.4s ease;
+            padding: 0 20px;
+            box-sizing: border-box;
+        }
+        #scene-navigator:hover { opacity: 1; }
+        body:active #scene-navigator { opacity: 1; } 
+        
+        .nav-item {
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            padding: 10px 5px;
+            border-bottom: 1px solid transparent;
+        }
+        .nav-item:hover {
+            color: #fff;
+            border-bottom: 1px solid rgba(255,255,255,0.5);
+        }
+        .nav-item.active {
+            color: #00d2ff;
+            border-bottom: 1px solid #00d2ff;
+        }
+
+        @media (max-width: 800px) {
+            .nav-item { font-size: 0.45rem; letter-spacing: 1px; gap: 4px; padding: 10px 2px;}
+            #scene-navigator { gap: 5px; height: 50px; }
+        }
+
+        /* =========================================================
+           SCOPED CHAPTER STYLES
+           ========================================================= */
+
+        /* --- FILE 0 --- */
+        #sec-0 { cursor: pointer; }
+        #overlay-0 {
+            position: absolute; bottom: 15%; width: 100%; text-align: center;
+            z-index: 100; opacity: 0; transition: opacity 3s ease-in-out; pointer-events: none;
+        }
+        #overlay-0.visible { opacity: 1; pointer-events: auto; }
+        .scroll-hint {
+            color: rgba(255, 255, 255, 0.6); font-size: 0.9rem; letter-spacing: 4px;
+            text-transform: uppercase; animation: pulseHint 2.5s infinite;
+        }
+        @keyframes pulseHint {
+            0%, 100% {opacity: 0.4; transform: scale(1);}
+            50% {opacity: 1; transform: scale(1.05);}
+        }
+
+        /* --- SHARED TEXT ELEMENTS --- */
+        .shared-text-container {
+            position: absolute; bottom: 12%; left: 50%; transform: translateX(-50%);
+            width: 85%; max-width: 700px; text-align: center; pointer-events: none; z-index: 10;
+        }
+        .shared-text-element {
+            color: rgba(255, 255, 255, 0.95); font-size: 1.2rem; font-weight: 300;
+            letter-spacing: 1px; line-height: 1.6; text-shadow: 0 0 15px rgba(255, 255, 255, 0.4);
+            opacity: 0; transition: opacity 1.5s ease; display: none;
+        }
+        .shared-text-element.active { display: block; opacity: 1; }
+        .shared-text-element b {
+            font-weight: 700; color: #fff; text-transform: uppercase; letter-spacing: 3px;
+            display: block; margin-bottom: 8px; font-size: 1.4rem;
+        }
+
+        #sec-10-12 .shared-text-element { transition: opacity 1s ease; }
+
+        /* --- FILE 13-15 --- */
+        #sec-13-15 { background-color: #050508; }
+        #tc-13-15 { height: 120px; max-width: 800px; }
+        #sec-13-15 .shared-text-element {
+            position: absolute; width: 100%; display: block;
+            visibility: hidden; transition: opacity 1.5s cubic-bezier(0.4, 0, 0.2, 1), visibility 1.5s;
+            font-size: 1.15rem; letter-spacing: 1.2px; line-height: 1.8; text-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+        }
+        #sec-13-15 .shared-text-element.active { visibility: visible; opacity: 1; }
+        #sec-13-15 .shared-text-element b {
+            letter-spacing: 4px; background: linear-gradient(to right, #ffffff, #cceeff);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+
+        /* --- FILE 16 --- */
+        #tc-16 { bottom: 10%; width: 90%; height: 100px; display: flex; align-items: flex-end; }
+        #sec-16 .shared-text-element {
+            position: absolute; width: 100%; display: block; visibility: hidden;
+            transition: opacity 1.2s ease, visibility 1.2s ease; font-size: 1.1rem; letter-spacing: 0.8px;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+        }
+        #sec-16 .shared-text-element.active { visibility: visible; opacity: 1; }
+
+        /* --- FILE 17-18 --- */
+        #tc-17-18 { bottom: 12%; width: 90%; height: 140px; display: flex; align-items: flex-end; }
+        #sec-17-18 .shared-text-element {
+            position: absolute; width: 100%; display: block; visibility: hidden;
+            transition: opacity 2s ease, visibility 2s ease, transform 2s ease; transform: translateY(10px);
+            font-size: 1.15rem; text-shadow: 0 0 15px rgba(0, 0, 0, 0.8);
+        }
+        #sec-17-18 .shared-text-element.active { visibility: visible; opacity: 1; transform: translateY(0); }
+
+        /* --- FILE 19-20 --- */
+        #tc-19-20 { bottom: 12%; width: 90%; height: 120px; display: flex; align-items: flex-end; }
+        #sec-19-20 .shared-text-element {
+            position: absolute; width: 100%; display: block; visibility: hidden;
+            transition: opacity 1.5s ease, transform 1.5s ease; transform: translateY(10px);
+            font-size: 1.15rem; text-shadow: 0 0 15px rgba(0, 0, 0, 0.9);
+        }
+        #sec-19-20 .shared-text-element.active { visibility: visible; opacity: 1; transform: translateY(0); }
+
+        /* --- FILE 21 --- */
+        #tc-21 {
+            position: absolute; top: 45%; left: 50%; transform: translate(-50%, -50%);
+            width: 85%; max-width: 900px; text-align: center; pointer-events: none; z-index: 100;
+        }
+        #sec-21 .text-element-21 {
+            position: absolute; width: 100%; left: 0; top: 50%; transform: translate(0, -50%);
+            color: #fff; font-size: 1.6rem; font-weight: 300; letter-spacing: 2px; line-height: 1.8;
+            opacity: 0; transition: opacity 1.5s ease, color 1.5s ease;
+            text-shadow: 0 0 15px rgba(0,0,0,0.5);
+        }
+        #sec-21 .text-element-21.active { opacity: 1; }
+        #sec-21 .text-dark { color: #000 !important; text-shadow: none !important; }
+
+        /* --- FILE 22 --- */
+        #sec-22 { background-color: #fff; cursor: crosshair; }
+        #contact-ui {
+            position: absolute; bottom: 10%; width: 100%; text-align: center;
+            z-index: 100; opacity: 0; transition: opacity 2s ease-in-out; pointer-events: none;
+        }
+        #contact-ui.visible { opacity: 1; pointer-events: auto; }
+        .name { font-size: 1.4rem; font-weight: 500; color: #000; margin-bottom: 5px; letter-spacing: 1px; }
+        .insta { font-size: 1.1rem; color: #666; text-decoration: none; transition: all 0.3s ease; display: inline-block; }
+        .insta:hover { color: #000; transform: scale(1.05); }
+
+    </style>
+</head>
+<body>
+
+    <!-- SCENE NAVIGATOR -->
+    <div id="scene-navigator">
+        <div class="nav-item active" onclick="goToSection(0)">Cosmos</div>
+        <div class="nav-item" onclick="goToSection(1)">Big Bang</div>
+        <div class="nav-item" onclick="goToSection(2)">Forge</div>
+        <div class="nav-item" onclick="goToSection(3)">Earth</div>
+        <div class="nav-item" onclick="goToSection(4)">Life</div>
+        <div class="nav-item" onclick="goToSection(5)">Dinosaurs</div>
+        <div class="nav-item" onclick="goToSection(6)">Impact</div>
+        <div class="nav-item" onclick="goToSection(7)">Mind</div>
+        <div class="nav-item" onclick="goToSection(8)">You</div>
+        <div class="nav-item" onclick="goToSection(9)">Contact</div>
+    </div>
+
+    <!-- ================= CHAPTER 0 (0.html) ================= -->
+    <div class="section active" id="sec-0">
+        <div id="overlay-0">
+            <div class="scroll-hint">Tap to explore</div>
+        </div>
+        <canvas id="canvas-0"></canvas>
+    </div>
+
+    <!-- ================= CHAPTER 1-6 (1-6.html) ================= -->
+    <div class="section" id="sec-1-6">
+        <div id="tc-1-6" class="shared-text-container">
+            <div id="s1-msg-1" class="shared-text-element">Ever wondered how we all came to exist?</div>
+            <div id="s1-msg-2" class="shared-text-element">Don't worry I got ya, lemme tell you<br>from the very beginning hahaha!</div>
+            <div id="s1-nar-1" class="shared-text-element">No space. No time. No laws. No direction.<br>Not darkness—because darkness needs space to exist.</div>
+            <div id="s1-nar-2" class="shared-text-element">There was no “before.”<br>Because time itself hadn’t begun.</div>
+            <div id="s1-nar-3" class="shared-text-element">And then—<br>something changed.</div>
+            <div id="s1-nar-4" class="shared-text-element"><b>The Big Bang</b><br>Not an explosion in space, but the appearance of space itself.</div>
+            <div id="s1-nar-5" class="shared-text-element"><b>Inflation</b><br>A violent stretching of reality.</div>
+            <div id="s1-nar-6" class="shared-text-element">Energy filled everything.<br>Temperature beyond comprehension.</div>
+            <div id="s1-nar-7" class="shared-text-element"><b>The First Seconds</b><br>As it expanded and cooled, tiny fluctuations became everything.</div>
+            <div id="s1-nar-8" class="shared-text-element">Particles blinked into existence and vanished.<br>Then some stayed, forming protons and neutrons.</div>
+            <div id="s1-nar-9" class="shared-text-element"><b>The First Atoms</b><br>The universe cooled enough for protons to capture electrons.</div>
+            <div id="s1-nar-10" class="shared-text-element">The first atoms formed: Hydrogen and Helium.<br>Simple, light, and everywhere.</div>
+            <div id="s1-nar-11" class="shared-text-element">And then—<br>nothing much happened… for millions of years.</div>
+            <div id="s1-nar-12" class="shared-text-element"><b>The Long Darkness</b><br>No stars or galaxies, just a vast, expanding fog of atoms.</div>
+            <div id="s1-nar-13" class="shared-text-element">Gravity was at work—quietly, constantly—<br>pulling matter into clumps as structure began to emerge.</div>
+            <div id="s1-nar-14" class="shared-text-element"><b>The First Stars</b><br>Gravity pulled regions denser, causing clouds to collapse.</div>
+            <div id="s1-nar-15" class="shared-text-element">Then, fusion ignited. The first stars were born,<br>and light finally entered the universe.</div>
+        </div>
+        <canvas id="canvas-1-6"></canvas>
+    </div>
+
+    <!-- ================= CHAPTER 7-9 (7-9.html) ================= -->
+    <div class="section" id="sec-7-9">
+        <div id="tc-7-9" class="shared-text-container">
+            <div id="s7-nar-1" class="shared-text-element"><b>Cosmic Alchemy</b><br>Inside those stars, something incredible happened.</div>
+            <div id="s7-nar-2" class="shared-text-element">Hydrogen fused into helium.<br>Helium into carbon. Carbon into heavier elements.</div>
+            <div id="s7-nar-3" class="shared-text-element">The universe learned complexity.</div>
+            <div id="s7-nar-4" class="shared-text-element">Every atom in your body—carbon, oxygen, nitrogen—<br>was forged in the heart of a star.</div>
+            <div id="s7-nar-5" class="shared-text-element"><b>Death of Stars</b><br>But stars don’t last forever.</div>
+            <div id="s7-nar-6" class="shared-text-element">When they run out of fuel, they collapse.</div>
+            <div id="s7-nar-7" class="shared-text-element">Some explode violently in <b>Supernovae</b>.</div>
+            <div id="s7-nar-8" class="shared-text-element">In those explosions, the heaviest elements are formed.<br>Gold. Iron. Calcium.</div>
+            <div id="s7-nar-9" class="shared-text-element">Then, scattered like seeds across space.</div>
+            <div id="s7-nar-10" class="shared-text-element"><b>Galaxies Form</b><br>Over billions of years, matter organized into galaxies.</div>
+            <div id="s7-nar-11" class="shared-text-element">Billions of stars, all bound together by gravity.</div>
+            <div id="s7-nar-12" class="shared-text-element">And one of them—just one—<br>would come to matter to you.</div>
+        </div>
+        <canvas id="canvas-7-9"></canvas>
+    </div>
+
+    <!-- ================= CHAPTER 10-12 (10-12.html) ================= -->
+    <div class="section" id="sec-10-12">
+        <div id="tc-10-12" class="shared-text-container">
+            <div id="s10-nar-1" class="shared-text-element"><b>A New Beginning</b><br>Amidst the billions of stars, a small cloud of dust began to collapse.</div>
+            <div id="s10-nar-2" class="shared-text-element">Our Sun was born—a modest star in the suburbs of the Milky Way.</div>
+            <div id="s10-nar-3" class="shared-text-element"><b>Accretion</b><br>Leftover debris collided and merged, forming the planets.</div>
+            <div id="s10-nar-4" class="shared-text-element">Among them was a small, rocky world, positioned just right.</div>
+            <div id="s10-nar-5" class="shared-text-element"><b>Early Earth</b><br>A chaotic landscape of molten rock and constant bombardment.</div>
+            <div id="s10-nar-6" class="shared-text-element">Yet, as it cooled, something miraculous happened...<br>but that is a story for another time.</div>
+        </div>
+        <canvas id="canvas-10-12"></canvas>
+    </div>
+
+    <!-- ================= CHAPTER 13-15 (13-15.html) ================= -->
+    <div class="section" id="sec-13-15">
+        <div id="tc-13-15" class="shared-text-container">
+            <div id="s13-nar-1" class="shared-text-element"><b>The Origin of Life</b><br>Somewhere in those oceans, molecules began to organize.</div>
+            <div id="s13-nar-2" class="shared-text-element">Not alive—yet. But close.</div>
+            <div id="s13-nar-3" class="shared-text-element">Then, somehow—something began to replicate.</div>
+            <div id="s13-nar-4" class="shared-text-element">Imperfect copies. Small errors.<br>That was enough. Evolution had begun.</div>
+            <div id="s13-nar-5" class="shared-text-element"><b>Billions of Years of Trial</b><br>Life didn’t aim for perfection. It just kept going.</div>
+            <div id="s13-nar-6" class="shared-text-element">Most attempts failed.<br>Extinction after extinction.</div>
+            <div id="s13-nar-7" class="shared-text-element">But some survived.<br>And those survivors changed.</div>
+            <div id="s13-nar-8" class="shared-text-element"><b>Complexity</b><br>Cells became more advanced. They learned to cooperate.</div>
+            <div id="s13-nar-9" class="shared-text-element">Multicellular life appeared.<br>Eyes. Limbs. Movement.</div>
+            <div id="s13-nar-10" class="shared-text-element">The world filled with strange forms.</div>
+        </div>
+        <canvas id="canvas-13-15"></canvas>
+    </div>
+
+    <!-- ================= CHAPTER 16 (16.html) ================= -->
+    <div class="section" id="sec-16">
+        <div id="tc-16" class="shared-text-container">
+            <div id="s16-nar-1" class="shared-text-element"><b>Dinosaurs</b><br>For millions of years, they dominated Earth.</div>
+            <div id="s16-nar-2" class="shared-text-element">Massive. Adapted. Successful.</div>
+            <div id="s16-nar-3" class="shared-text-element">They ruled longer than humans have existed.</div>
+        </div>
+        <canvas id="canvas-16"></canvas>
+    </div>
+
+    <!-- ================= CHAPTER 17-18 (17-18.html) ================= -->
+    <div class="section" id="sec-17-18">
+        <div id="tc-17-18" class="shared-text-container">
+            <div id="s17-nar-1" class="shared-text-element"><b>The Impact</b><br>Then—a rock from space.</div>
+            <div id="s17-nar-2" class="shared-text-element">Fast. Silent. Unstoppable.</div>
+            <div id="s17-nar-3" class="shared-text-element">It hit.</div>
+            <div id="s17-nar-4" class="shared-text-element"><b>Firestorms. Darkness. Collapse.</b><br>Most life disappeared.</div>
+            <div id="s17-nar-5" class="shared-text-element"><b>Survival</b><br>But not all.</div>
+            <div id="s17-nar-6" class="shared-text-element">Small creatures endured.</div>
+            <div id="s17-nar-7" class="shared-text-element">Hidden. Adaptive. Resilient.</div>
+            <div id="s17-nar-8" class="shared-text-element">They inherited the world.</div>
+        </div>
+        <canvas id="canvas-17-18"></canvas>
+    </div>
+
+    <!-- ================= CHAPTER 19-20 (19-20.html) ================= -->
+    <div class="section" id="sec-19-20">
+        <div id="tc-19-20" class="shared-text-container">
+            <div id="s19-nar-1" class="shared-text-element"><b>Mammals Rise</b><br>They grew. Diversified. Experimented.</div>
+            <div id="s19-nar-2" class="shared-text-element">Among them— primates.</div>
+            <div id="s19-nar-3" class="shared-text-element"><b>Humans</b><br>One branch evolved something unusual.</div>
+            <div id="s19-nar-4" class="shared-text-element">Awareness. The ability to think… about thinking.</div>
+            <div id="s19-nar-5" class="shared-text-element">To question. To imagine.</div>
+            <div id="s19-nar-6" class="shared-text-element">To understand the universe— even partially.</div>
+        </div>
+        <canvas id="canvas-19-20"></canvas>
+    </div>
+
+    <!-- ================= CHAPTER 21 (21.html) ================= -->
+    <div class="section" id="sec-21">
+        <div id="tc-21"></div>
+        <canvas id="canvas-21"></canvas>
+    </div>
+
+    <!-- ================= CHAPTER 22 (22.html) ================= -->
+    <div class="section" id="sec-22">
+        <div id="contact-ui">
+            <div class="name">made by Navneet</div>
+            <a href="https://instagram.com/oneinagoogolplex._" target="_blank" class="insta">@oneinagoogolplex._</a>
+        </div>
+        <canvas id="canvas-22"></canvas>
+    </div>
+
+<script>
+    /* =========================================================
+       GLOBAL SLIDESHOW CONTROLLER & OBSERVER MOCK
+       ========================================================= */
+    const sections = ['sec-0', 'sec-1-6', 'sec-7-9', 'sec-10-12', 'sec-13-15', 'sec-16', 'sec-17-18', 'sec-19-20', 'sec-21', 'sec-22'];
+    let currentSectionIndex = 0;
+    window.sectionObservers = {};
+
+    function goToSection(index) {
+        if (index < 0 || index >= sections.length) return;
+        
+        const prevSecId = sections[currentSectionIndex];
+        const nextSecId = sections[index];
+
+        document.getElementById(prevSecId).classList.remove('active');
+        if (window.sectionObservers[prevSecId] && window.sectionObservers[prevSecId].onLeave) {
+            window.sectionObservers[prevSecId].onLeave();
+        }
+
+        currentSectionIndex = index;
+
+        document.getElementById(nextSecId).classList.add('active');
+        if (window.sectionObservers[nextSecId] && window.sectionObservers[nextSecId].onEnter) {
+            window.sectionObservers[nextSecId].onEnter();
+        }
+
+        document.querySelectorAll('.nav-item').forEach((item, i) => {
+            item.classList.toggle('active', i === index);
+        });
+    }
+
+    /* Initialize first section */
+    setTimeout(() => {
+        if (window.sectionObservers['sec-0']) window.sectionObservers['sec-0'].onEnter();
+    }, 100);
+
+
+    /* =========================================================
+       CHAPTER 0 (0.html)
+       ========================================================= */
+    (function() {
+        const canvas = document.getElementById('canvas-0');
+        const ctx = canvas.getContext('2d');
+        const overlay = document.getElementById('overlay-0');
+
+        let width, height;
+        let particles =[];
+        const PARTICLE_COUNT = 5000; 
+        const TITLE = "The Cosmos";
+        let isActive = false;
+        let initTimeout, overlayTimeout;
+        
+        let mouse = { x: -1000, y: -1000, radius: 100 };
+        let textFormed = false;
+
+        const colors =['#ff00ff', '#00ffff', '#7000ff', '#ff0055', '#ffffff'];
+
+        class Particle {
+            constructor() { this.init(); }
+            init() {
+                this.x = Math.random() * window.innerWidth;
+                this.y = Math.random() * window.innerHeight;
+                this.homeX = this.x; this.homeY = this.y;
+                this.vx = (Math.random() - 0.5) * 0.5; this.vy = (Math.random() - 0.5) * 0.5;
+                this.size = Math.random() * 1.5 + 0.5;
+                this.baseColor = colors[Math.floor(Math.random() * colors.length)];
+                this.color = this.baseColor; this.isText = false;
+                this.alpha = Math.random() * 0.5 + 0.2;
+            }
+            update() {
+                let dx = mouse.x - this.x; let dy = mouse.y - this.y;
+                let dist = Math.sqrt(dx*dx + dy*dy);
+                if (dist < mouse.radius) {
+                    let force = (mouse.radius - dist) / mouse.radius;
+                    let angle = Math.atan2(dy, dx);
+                    this.vx -= Math.cos(angle) * force * 0.6; this.vy -= Math.sin(angle) * force * 0.6;
+                    this.alpha = 1.0; 
+                } else { this.alpha += (0.6 - this.alpha) * 0.02; }
+                if (this.isText) {
+                    this.x += (this.homeX - this.x) * 0.06 + this.vx; this.y += (this.homeY - this.y) * 0.06 + this.vy;
+                    this.vx *= 0.9; this.vy *= 0.9;
+                } else {
+                    this.x += this.vx; this.y += this.vy;
+                    if (this.x < 0) this.x = width; if (this.x > width) this.x = 0;
+                    if (this.y < 0) this.y = height; if (this.y > height) this.y = 0;
+                }
+            }
+            draw() {
+                ctx.globalAlpha = this.alpha; ctx.fillStyle = this.color;
+                ctx.fillRect(this.x, this.y, this.size, this.size);
+            }
+        }
+
+        function sampleTextPoints() {
+            const tempCanvas = document.createElement('canvas'); const tempCtx = tempCanvas.getContext('2d');
+            tempCanvas.width = width; tempCanvas.height = height;
+            tempCtx.fillStyle = "#000"; let fontSize = Math.min(width * 0.15, 160);
+            tempCtx.font = `700 ${fontSize}px 'Caveat'`; tempCtx.textAlign = "center"; tempCtx.textBaseline = "middle";
+            tempCtx.fillText(TITLE, width / 2, height / 2);
+            const imageData = tempCtx.getImageData(0, 0, width, height).data;
+            const points =[]; const step = width < 600 ? 3 : 4; 
+            for (let y = 0; y < height; y += step) {
+                for (let x = 0; x < width; x += step) {
+                    const index = (y * width + x) * 4 + 3;
+                    if (imageData[index] > 128) points.push({ x, y });
+                }
+            }
+            return points;
+        }
+
+        function init() {
+            clearTimeout(initTimeout); clearTimeout(overlayTimeout);
+            overlay.classList.remove('visible'); textFormed = false; mouse.x = -1000; mouse.y = -1000;
+            width = window.innerWidth; height = window.innerHeight;
+            canvas.width = width; canvas.height = height;
+            particles = Array.from({ length: PARTICLE_COUNT }, () => new Particle());
+
+            initTimeout = setTimeout(() => {
+                const points = sampleTextPoints();
+                for (let i = 0; i < points.length && i < particles.length; i++) {
+                    particles[i].homeX = points[i].x; particles[i].homeY = points[i].y;
+                    particles[i].isText = true;
+                    particles[i].vx = (Math.random() - 0.5) * 10; particles[i].vy = (Math.random() - 0.5) * 10;
+                }
+                textFormed = true;
+                overlayTimeout = setTimeout(() => overlay.classList.add('visible'), 2000);
+            }, 1200);
+        }
+
+        function animate() {
+            if (isActive) {
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.15)'; ctx.fillRect(0, 0, width, height);
+                for (let i = 0; i < particles.length; i++) { particles[i].update(); particles[i].draw(); }
+            }
+            requestAnimationFrame(animate);
+        }
+
+        const handleInput = (e) => {
+            const rect = canvas.getBoundingClientRect();
+            mouse.x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
+            mouse.y = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top;
+        };
+
+        window.addEventListener('mousemove', handleInput);
+        window.addEventListener('touchstart', (e) => { handleInput(e); mouse.radius = 150; }, {passive: true});
+        window.addEventListener('touchmove', handleInput, {passive: true});
+        window.addEventListener('touchend', () => { mouse.x = -1000; mouse.y = -1000; });
+        window.addEventListener('resize', init);
+        
+        document.getElementById('sec-0').addEventListener('click', () => { if(textFormed) goToSection(1); });
+
+        window.sectionObservers['sec-0'] = {
+            onEnter: () => { isActive = true; init(); },
+            onLeave: () => { isActive = false; }
+        };
+        animate();
+    })();
+
+    /* =========================================================
+       ULTRA-HIGH RES PIXEL CLASS (Shared Base)
+       ========================================================= */
+    class HighResPixel {
+        constructor(x, y) { 
+            this.x = x; this.y = y; 
+            this.brightness = 0; 
+            this.size = 1.3; // Very tiny distinct grid size
+            this.color = {r: 255, g: 255, b: 255}; 
+        }
+        draw(ctx) {
+            if (this.brightness < 0.01) return;
+            // 3D effect: Brighter pixels bloom slightly larger to simulate volumetric depth
+            let a = this.brightness > 1 ? 1 : this.brightness;
+            ctx.globalAlpha = a; 
+            ctx.fillStyle = `rgb(${this.color.r}, ${this.color.g}, ${this.color.b})`;
+            let s = this.size * (0.6 + a * 0.8);
+            ctx.fillRect(this.x - s/2, this.y - s/2, s, s); // Optimized fillRect instead of Arc
+        }
+    }
+
+    /* =========================================================
+       CHAPTER 1-6 (1-6.html) - BIG BANG
+       ========================================================= */
+    (function() {
+        const canvas = document.getElementById('canvas-1-6');
+        const ctx = canvas.getContext('2d');
+        const uiElements = Array.from({length: 17}, (_, i) => document.getElementById(`s1-msg-${i+1}`) || document.getElementById(`s1-nar-${i-1}`));
+        let isActive = false;
+        let width, height; let pixels =[]; const spacing = 3.5; 
+        let gameFrame = 0; let currentState = 0; let stateTimer = 0;
+        let stickmanX = 0; let stickmanY = 0; let cameraY = 0;
+        const walkSpeed = 2.2; let bangScale = 0;
+
+        function jumpToState(stateNum) {
+            currentState = stateNum; stateTimer = 0;
+            if (stateNum < 7) { cameraY = 0; stickmanX = width/2; } else { cameraY = height + 300; } 
+            if (stateNum === 9) bangScale = 0;
+            showUI(-1);
+        }
+
+        function initGrid() {
+            width = canvas.width = window.innerWidth; height = canvas.height = window.innerHeight;
+            stickmanY = height * 0.7; stickmanX = width / 2; pixels =[];
+            for (let x = 0; x < width; x += spacing) { for (let y = 0; y < height; y += spacing) pixels.push(new HighResPixel(x, y)); }
+        }
+
+        function getLineDist(px, py, x1, y1, x2, y2) {
+            const l2 = (x1-x2)**2 + (y1-y2)**2;
+            if (l2 === 0) return Math.sqrt((px-x1)**2 + (py-y1)**2);
+            let t = Math.max(0, Math.min(1, ((px-x1)*(x2-x1) + (py-y1)*(y2-y1)) / l2));
+            return Math.sqrt((px-(x1+t*(x2-x1)))**2 + (py-(y1+t*(y2-y1)))**2);
+        }
+
+        function showUI(index) { uiElements.forEach((el, i) => { if(el) el.classList.toggle('active', i === index); }); }
+
+        function getPixelState(px, py) {
+            if (currentState <= 6) {
+                const drawY = py + cameraY; const headRadius = 18; const bodyHeight = 15;
+                const isWalking = (currentState === 3 || currentState === 4);
+                const bounce = isWalking ? Math.abs(Math.sin(gameFrame * 0.2)) * 6 : Math.sin(gameFrame * 0.05) * 2;
+                const currentStickY = stickmanY - bounce; const headY = currentStickY - bodyHeight - headRadius;
+                if (drawY < -50 || drawY > height + 50) return { b: 0 };
+                const dx = px - stickmanX; const dy = drawY - headY; const headDist = Math.sqrt(dx*dx + dy*dy);
+                if (headDist < headRadius) return { b: Math.min(1, (headRadius - headDist) * 1.5) };
+                const bodyDist = getLineDist(px, drawY, stickmanX, headY + headRadius, stickmanX, currentStickY);
+                if (bodyDist < 3) return { b: 1 - (bodyDist/3) };
+                let walkPhase = Math.sin(gameFrame * 0.2); let legX = isWalking ? walkPhase * 12 : 6;
+                const dL = getLineDist(px, drawY, stickmanX, currentStickY, stickmanX - legX, currentStickY + 25);
+                const dR = getLineDist(px, drawY, stickmanX, currentStickY, stickmanX + legX, currentStickY + 25);
+                if (dL < 2.5) return { b: 1 - (dL/2.5) }; if (dR < 2.5) return { b: 1 - (dR/2.5) };
+                const shoulderY = headY + headRadius + 4;
+                if (currentState === 5) {
+                    let wave = Math.sin(gameFrame * 0.3) * 15;
+                    const aL = getLineDist(px, drawY, stickmanX, shoulderY, stickmanX - 18, shoulderY - 15 + wave);
+                    const aR = getLineDist(px, drawY, stickmanX, shoulderY, stickmanX + 18, shoulderY - 15 - wave);
+                    if (aL < 2.5) return { b: 1 - (aL/2.5) }; if (aR < 2.5) return { b: 1 - (aR/2.5) };
+                } else {
+                    let armSwing = isWalking ? -walkPhase * 12 : 4;
+                    const aL = getLineDist(px, drawY, stickmanX, shoulderY, stickmanX - 12 - armSwing, shoulderY + 12);
+                    const aR = getLineDist(px, drawY, stickmanX, shoulderY, stickmanX + 12 + armSwing, shoulderY + 12);
+                    if (aL < 2.5) return { b: 1 - (aL/2.5) }; if (aR < 2.5) return { b: 1 - (aR/2.5) };
+                }
+            }
+            if (currentState >= 7) {
+                const cx = width / 2; const cy = height / 2;
+                const dx = px - cx; const dy = py - cy; const dist = Math.sqrt(dx*dx + dy*dy); const angle = Math.atan2(dy, dx);
+                let time = gameFrame * 0.08;
+                
+                // Big Bang Volume Shading
+                if (currentState === 8) { 
+                    const sRadius = 4 + Math.sin(gameFrame * 0.15);
+                    if (dist < sRadius) return { b: 1.5, c: {r:255, g:255, b:255} };
+                    if (dist < sRadius + 15) return { b: 1 - (dist-sRadius)/15, c: {r:200, g:220, b:255} };
+                }
+                if (currentState === 9) { 
+                    let ripple1 = Math.sin(dist * 0.05 - time); 
+                    let ripple2 = Math.sin(dx * 0.02 + time) * Math.cos(dy * 0.02 + time);
+                    let interference = ripple1 * ripple2;
+                    let zFake = Math.sin(dist * 0.01) * 2; // Volume depth
+                    if (dist < bangScale && dist > bangScale - 90) {
+                        let edgeFade = 1 - Math.abs((dist - (bangScale-45))/45);
+                        return { b: edgeFade * 1.5 + zFake, c: {r: 255, g: 240, b: 200} };
+                    }
+                    if (dist < bangScale && interference > 0.2) {
+                        return { b: 0.6 * interference + zFake*0.2, c: {r: 255, g: 200, b: 150} };
+                    }
+                }
+                if (currentState === 10) { 
+                    let noise = Math.sin(px * 0.04 + gameFrame * 0.08) * Math.cos(py * 0.04 - gameFrame * 0.05);
+                    if (Math.random() > 0.85 + (noise * 0.12)) return { b: Math.random() * 1.5, c: {r: 255, g: 220 + Math.random()*35, b: 150} };
+                }
+                if (currentState === 11) { 
+                    let clusterSize = 35; let gridX = Math.floor(px / clusterSize); let gridY = Math.floor(py / clusterSize);
+                    let clusterCenter = { x: gridX * clusterSize + clusterSize/2 + Math.sin(gridY + gameFrame * 0.02) * 12, y: gridY * clusterSize + clusterSize/2 + Math.cos(gridX + gameFrame * 0.02) * 12 };
+                    let distToCluster = Math.sqrt((px - clusterCenter.x)**2 + (py - clusterCenter.y)**2);
+                    if (distToCluster < 4) return { b: 1.2 - distToCluster/4, c: {r: 200, g: 230, b: 255} };
+                    else if (distToCluster < 10 && Math.random() > 0.88) return { b: 0.45, c: {r: 150, g: 180, b: 255} };
+                }
+                if (currentState === 12 || currentState === 13) { 
+                    let atomGrid = 70; let nx = Math.floor(px / atomGrid) * atomGrid + atomGrid/2; let ny = Math.floor(py / atomGrid) * atomGrid + atomGrid/2;
+                    let distToNucleus = Math.sqrt((px - nx)**2 + (py - ny)**2); 
+                    let captureFade = currentState === 12 ? Math.min(1, stateTimer / 200) : Math.max(0, 1 - stateTimer / 270);
+                    let bgNoise = Math.random() > 0.95 ? 0.35 * captureFade : 0;
+                    if (distToNucleus < 4.5) return { b: 1.2 * captureFade, c: {r: 255, g: 120, b: 120} };
+                    else if (distToNucleus > 15 && distToNucleus < 22 && currentState === 12) {
+                        let atomAngle = Math.atan2(py - ny, px - nx); let electronDot = Math.sin(atomAngle * 1 - gameFrame * 0.18);
+                        if (electronDot > 0.85) return { b: captureFade * 1.5, c: {r: 120, g: 210, b: 255} };
+                    }
+                    if (bgNoise > 0) return { b: bgNoise, c: {r: 255, g: 255, b: 255} };
+                }
+                if (currentState === 14) { 
+                    let gridCellSize = 70; let gridX = Math.floor(px / gridCellSize); let gridY = Math.floor(py / gridCellSize);
+                    let seed = Math.sin(gridX * 13.5) * Math.cos(gridY * 37.2); let density = (seed + 1) / 2;
+                    let gravityTime = Math.min(1, stateTimer / 530); let visibilityThreshold = 0.96 - (gravityTime * 0.45);
+                    if (density > visibilityThreshold) return { b: (density - visibilityThreshold) * 4.5, c: {r: 160, g: 190, b: 255} };
+                }
+                if (currentState === 15) { 
+                    let pressure = Math.min(1, stateTimer / 250); let pull = Math.max(0, 1 - (dist / 450));
+                    if (dist < 280 - pressure * 180) return { b: (pull * pressure) + (Math.random() * 0.35), c: {r: 210, g: 230, b: 255} };
+                    if (Math.random() > 0.98) return { b: 0.25, c: {r: 120, g: 120, b: 180} };
+                }
+                if (currentState === 16) { 
+                    if (stateTimer < 60) return { b: 1.5 - (stateTimer / 60) + (Math.random() * 0.8), c: {r: 255, g: 255, b: 255} };
+                    let starTime = gameFrame * 0.1; let starRadius = 45 + Math.sin(starTime * 2.2) * 3; 
+                    if (dist < starRadius) return { b: 1.8, c: {r: 255, g: 255, b: 230} }; 
+                    let rays = Math.sin(angle * 6 - starTime * 0.25) + Math.cos(angle * 10 + starTime * 0.15);
+                    if (rays > 1.1) return { b: Math.max(0, 1 - dist / 550) * 0.9, c: {r: 255, g: 245, b: 210} };
+                    if (Math.random() > 0.96) return { b: 0.25 * (1-dist/850), c: {r: 160, g: 210, b: 255} };
+                }
+            }
+            return { b: 0 };
+        }
+
+        function update() {
+            gameFrame++; stateTimer++; const NARRATIVE_DURATION = 270;
+            switch(currentState) {
+                case 0: if(stateTimer > 50) { currentState=1; stateTimer=0; } break;
+                case 1: if(stateTimer > 30) { currentState=2; stateTimer=0; } break;
+                case 2: showUI(0); if(stateTimer > NARRATIVE_DURATION) { currentState=3; stateTimer=0; } break;
+                case 3: stickmanX += walkSpeed; if(stateTimer > 120) { currentState=4; stateTimer=0; } break;
+                case 4: stickmanX -= walkSpeed; if(stickmanX <= width/2) { stickmanX=width/2; currentState=5; stateTimer=0; } break;
+                case 5: showUI(1); if(stateTimer > NARRATIVE_DURATION) { currentState=6; stateTimer=0; } break;
+                case 6: showUI(-1); cameraY += 7; if(cameraY > height + 200) { currentState = 7; stateTimer = 0; } break;
+                case 7: 
+                    if (stateTimer === 10) showUI(2); if (stateTimer === NARRATIVE_DURATION) showUI(3);
+                    if (stateTimer === NARRATIVE_DURATION * 2) showUI(4); if (stateTimer > NARRATIVE_DURATION * 3) { currentState = 8; stateTimer = 0; } break;
+                case 8: if (stateTimer > 50) { currentState = 9; stateTimer = 0; bangScale = 0; } break;
+                case 9: showUI(5); bangScale += 14; if (bangScale > width * 1.6) { currentState = 10; stateTimer = 0; } break;
+                case 10: 
+                    if (stateTimer === 10) showUI(6); if (stateTimer === NARRATIVE_DURATION) showUI(7);
+                    if (stateTimer > NARRATIVE_DURATION * 2) { currentState = 11; stateTimer = 0; } break;
+                case 11: 
+                    if (stateTimer === 10) showUI(8); if (stateTimer === NARRATIVE_DURATION) showUI(9);
+                    if (stateTimer > NARRATIVE_DURATION * 2) { currentState = 12; stateTimer = 0; } break;
+                case 12: 
+                    if (stateTimer === 10) showUI(10); if (stateTimer === NARRATIVE_DURATION) showUI(11);
+                    if (stateTimer > NARRATIVE_DURATION * 2) { currentState = 13; stateTimer = 0; } break;
+                case 13: if (stateTimer === 10) showUI(12); if (stateTimer > NARRATIVE_DURATION) { currentState = 14; stateTimer = 0; } break;
+                case 14: if (stateTimer === 10) showUI(13); if (stateTimer > NARRATIVE_DURATION) { currentState = 15; stateTimer = 0; } break;
+                case 15: if (stateTimer === 10) showUI(14); if (stateTimer > NARRATIVE_DURATION) { currentState = 16; stateTimer = 0; } break;
+                case 16: if (stateTimer === 10) showUI(15);
+                    if (stateTimer > NARRATIVE_DURATION + 150) { showUI(-1); goToSection(2); } break; // SLIDESHOW ADVANCE
+            }
+        }
+
+        function draw() {
+            if (isActive) {
+                ctx.fillStyle = "black"; ctx.fillRect(0, 0, width, height); update();
+                ctx.beginPath();
+                for (let i = 0; i < pixels.length; i++) {
+                    const p = pixels[i]; const res = getPixelState(p.x, p.y);
+                    p.brightness = res.b || 0; p.color = res.c || {r: 255, g: 255, b: 255};
+                    p.draw(ctx);
+                }
+            }
+            requestAnimationFrame(draw);
+        }
+
+        window.addEventListener('resize', initGrid);
+        window.sectionObservers['sec-1-6'] = {
+            onEnter: () => { isActive = true; jumpToState(0); initGrid(); },
+            onLeave: () => { isActive = false; }
+        };
+        draw();
+    })();
+
+    /* =========================================================
+       CHAPTER 7-9 (7-9.html) - FORGE (Supernovae & Galaxies)
+       ========================================================= */
+    (function() {
+        const canvas = document.getElementById('canvas-7-9');
+        const ctx = canvas.getContext('2d');
+        const uiElements = Array.from({length: 12}, (_, i) => document.getElementById(`s7-nar-${i+1}`));
+        let isActive = false;
+        let width, height; let pixels =[]; const spacing = 3.5; 
+        let gameFrame = 0; let currentState = 0; let stateTimer = 0; let shake = 0;
+
+        function initGrid() {
+            width = canvas.width = window.innerWidth; height = canvas.height = window.innerHeight; pixels =[];
+            for (let x = 0; x < width; x += spacing) { for (let y = 0; y < height; y += spacing) pixels.push(new HighResPixel(x, y)); }
+        }
+
+        function showUI(index) { uiElements.forEach((el, i) => { el.classList.toggle('active', i === index); }); }
+        const fastNoise = (x, y, t) => Math.sin(x * 0.01 + t) * Math.cos(y * 0.01 + t * 0.7);
+
+        function getPixelState(px, py) {
+            let rx = px; let ry = py;
+            if (shake > 0) { rx += (Math.random() - 0.5) * shake; ry += (Math.random() - 0.5) * shake; }
+
+            const cx = width / 2; const cy = height / 2;
+            const dx = rx - cx; const dy = ry - cy; const dist = Math.sqrt(dx*dx + dy*dy); const angle = Math.atan2(dy, dx);
+            
+            if (currentState === 0) {
+                let time = gameFrame * 0.03; let intensity = 0; let color = {r: 255, g: 255, b: 255};
+                const atoms =[ {x: Math.cos(time)*85, y: Math.sin(time*0.8)*40, r: 16, c: {r:255, g:100, b:100}}, {x: Math.cos(time+Math.PI)*85, y: Math.sin(time*0.8+Math.PI)*40, r: 16, c: {r:100, g:180, b:255}} ];
+                for (let i = 0; i < atoms.length; i++) {
+                    const a = atoms[i]; let d = Math.sqrt((rx-(cx+a.x))**2 + (ry-(cy+a.y))**2);
+                    if (d < a.r) { intensity = Math.min(1.4, (a.r - d) * 1.0); color = a.c; }
+                    let eAngle = time * 4.5; let ex = a.x + Math.cos(eAngle) * 35; let ey = a.y + Math.sin(eAngle * 1.4) * 22;
+                    let ed = Math.sqrt((rx - (cx + ex))**2 + (ry - (cy + ey))**2);
+                    if (ed < 6) { intensity = 1.5; color = {r:255, g:255, b:255}; }
+                }
+                let fusionDist = Math.abs(atoms[0].x - atoms[1].x);
+                if (fusionDist < 45) { let g = (1 - fusionDist/45) * (1 - dist/125); if (g > 0) { intensity = Math.max(intensity, g * 4); color = {r:255, g:255, b:180}; } }
+                if (intensity > 0) return { b: intensity, c: color }; 
+                // Nebula background shading
+                return { b: (fastNoise(rx, ry, time*0.1)+1)*0.08, c: {r:40, g:45, b:90} };
+            }
+            if (currentState === 1) {
+                let colP = 150, bngP = 180;
+                if (stateTimer < colP) {
+                    let t = stateTimer / colP; let r = 110 * (1 - t*0.2) * (1 + Math.sin(stateTimer*0.2)*0.05);
+                    // 3D Rim lighting on collapsing star
+                    let rim = Math.pow(dist/r, 3);
+                    if (dist < r) return { b: 1.2 + fastNoise(rx, ry, gameFrame*0.1) + rim, c: {r: 255, g: 70+t*80 + rim*50, b: 40} };
+                } else if (stateTimer < bngP) {
+                    let t = (stateTimer - colP) / (bngP - colP); let r = 100 * Math.pow(1 - t, 4);
+                    if (dist < r + 12) return { b: 4, c: {r: 255, g: 255, b: 255} };
+                    if (Math.sin(angle * 12 - t * 25) > 0.8 && dist < 450) return { b: 1.2 * (1 - dist/450), c: {r: 255, g: 255, b: 255} };
+                } else {
+                    let t = stateTimer - bngP; let shock = t * 18, debris = t * 8;
+                    if (dist < shock && dist > shock - 75) {
+                        let vol = (1 - Math.abs(dist - (shock-37))/37); // Volumetric shockwave edge
+                        return { b: vol*3.5, c: {r: 255, g: 245, b: 210} };
+                    }
+                    if (dist < debris) {
+                        let n = fastNoise(rx*0.4, ry*0.4, gameFrame*0.06); let life = Math.max(0, 1 - t/450);
+                        if (n > 0.6) return { b: life*2.5, c: {r:255, g:220, b:80} }; 
+                        return { b: life*1.2, c: {r: 255, g: 100+n*140, b: 50} };
+                    }
+                }
+            }
+            if (currentState === 2) { // 3D Galaxy Formation
+                let time = gameFrame * 0.01; let sTight = 0.45, rot = time * 2.8; 
+                let expAngle = Math.log(dist / 18) / sTight;
+                let dAngle = (angle - expAngle + rot) % Math.PI; if (dAngle < 0) dAngle += Math.PI;
+                let distScale = 1 - dist / (width * 0.6);
+                
+                if (distScale > 0) {
+                    let intensity = dist < 70 ? (1 - dist/70)*3.5 : 0; // Bulge
+                    // Arms
+                    if (dist > 30) intensity += Math.exp(-Math.pow(dAngle - 1.5, 2)*7) * distScale * 2.2;
+                    intensity += fastNoise(rx*0.3, ry*0.3, time)*0.4 * distScale;
+                    
+                    if (Math.random() > 0.995) intensity += 2.5; // Stars
+                    
+                    // Add subtle 3D tilt shading
+                    let tiltShadow = Math.sin(angle) * 0.3 + 0.7;
+                    return { b: intensity * tiltShadow, c: {r: 180+distScale*75, g: 210, b: 255} };
+                }
+            }
+            return { b: 0 };
+        }
+
+        function update() {
+            gameFrame++; stateTimer++; const DUR = 60; 
+            if (currentState === 1 && stateTimer === 180) shake = 40; if (shake > 0) shake *= 0.9;
+            switch(currentState) {
+                case 0: 
+                    if (stateTimer === 10) showUI(0); if (stateTimer === DUR) showUI(1);
+                    if (stateTimer === DUR*2) showUI(2); if (stateTimer === DUR*3) showUI(3);
+                    if (stateTimer > DUR*4) { currentState = 1; stateTimer = 0; } break;
+                case 1: 
+                    if (stateTimer === 10) showUI(4); if (stateTimer === DUR) showUI(5);
+                    if (stateTimer === DUR*2) showUI(6); if (stateTimer === DUR*3) showUI(7);
+                    if (stateTimer === DUR*4) showUI(8); if (stateTimer > DUR*5) { currentState = 2; stateTimer = 0; } break;
+                case 2: 
+                    if (stateTimer === 10) showUI(9); if (stateTimer === DUR) showUI(10);
+                    if (stateTimer === DUR*2) showUI(11); if (stateTimer > DUR*3 + 150) { showUI(-1); goToSection(3); } break;
+            }
+        }
+
+        function draw() {
+            if (isActive) {
+                ctx.fillStyle = "black"; ctx.fillRect(0, 0, width, height); update();
+                const len = pixels.length;
+                for (let i = 0; i < len; i++) {
+                    const p = pixels[i]; const res = getPixelState(p.x, p.y);
+                    p.brightness = res.b || 0; p.color = res.c || {r: 255, g: 255, b: 255};
+                    p.draw(ctx);
+                }
+            }
+            requestAnimationFrame(draw);
+        }
+
+        window.addEventListener('resize', initGrid);
+        window.sectionObservers['sec-7-9'] = {
+            onEnter: () => { isActive = true; currentState = 0; stateTimer = 0; gameFrame = 0; showUI(-1); initGrid(); },
+            onLeave: () => { isActive = false; }
+        };
+        draw();
+    })();
+
+    /* =========================================================
+       CHAPTER 10-12 (10-12.html) - ACCRETION & 3D EARTH
+       ========================================================= */
+    (function() {
+        const canvas = document.getElementById('canvas-10-12');
+        const ctx = canvas.getContext('2d');
+        const uiElements = Array.from({length:6}, (_, i) => document.getElementById(`s10-nar-${i+1}`));
+        let isActive = false;
+        let width, height; let pixels =[]; const spacing = 3.5; 
+        let gameFrame = 0; let currentState = 0; let stateTimer = 0; const DUR = 80; 
+
+        function initGrid() {
+            width = canvas.width = window.innerWidth; height = canvas.height = window.innerHeight; pixels =[];
+            for (let x = 0; x < width; x += spacing) { for (let y = 0; y < height; y += spacing) pixels.push(new HighResPixel(x, y)); }
+        }
+
+        function showUI(index) { uiElements.forEach((el, i) => { el.classList.toggle('active', i === index); }); }
+        const tex = (x, y, t) => Math.sin(x * 0.02 + t) * Math.cos(y * 0.02 + t * 0.5) + Math.sin(x * 0.05 - t) * Math.cos(y * 0.05 + t * 0.8) * 0.5;
+
+        function getPixelState(px, py) {
+            const cx = width / 2; const cy = height / 2;
+            const dx = px - cx; const dy = py - cy; const dist = Math.sqrt(dx*dx + dy*dy); const angle = Math.atan2(dy, dx);
+            
+            if (currentState === 0) { // Nebula collapse
+                let time = gameFrame * 0.02; let swirl = Math.sin(dist * 0.02 - angle * 4 + time * 2);
+                let nebColor = {r: 255, g: 100 + swirl * 50, b: 50};
+                if (dist < 50) { let flare = Math.sin(angle * 8 + time * 5) * 5; if (dist < 40 + flare) return { b: 2.5, c: {r: 255, g: 240, b: 180} }; }
+                let filament = Math.pow(Math.max(0, swirl), 4) * (1 - dist/400);
+                if (filament > 0.1) return { b: filament * 1.8, c: nebColor };
+                if ((Math.sin(px * 1.5) * Math.cos(py * 1.5)) > 0.9992) return { b: 0.9, c: {r:255, g:255, b:255} };
+            }
+            if (currentState === 1) { // 3D Tilted Accretion Disk
+                let time = gameFrame * 0.02; 
+                let tilt = 0.45; // Squish factor for 3D
+                let dy3d = dy / tilt;
+                let dist3d = Math.sqrt(dx*dx + dy3d*dy3d);
+                let angle3d = Math.atan2(dy3d, dx);
+
+                if (dist3d < 65) return { b: 2.2, c: {r: 255, g: 210, b: 120} }; // Protostar
+                
+                let diskEdge = Math.abs(dist3d - 280) < 180;
+                if (diskEdge) {
+                    let n = tex(dx * 0.015, dy3d * 0.015, time * 0.5); 
+                    let orbitSpeed = angle3d + (time * 600 / dist3d);
+                    let grain = Math.sin(dist3d * 0.6 + orbitSpeed * 10);
+                    // 3D Rim/Volumetric lighting
+                    let lightDir = Math.cos(angle3d - Math.PI/4);
+                    let shade = 0.5 + 0.5 * lightDir;
+                    
+                    if (grain > 0.3) {
+                        let intensity = (1 - Math.abs(dist3d - 280) / 180) * n * shade * 2.0;
+                        return { b: intensity, c: {r: 255, g: 160 + dist3d*0.15, b: 100} };
+                    }
+                }
+                // Protoplanets
+                let planets =[ {r: 200, a: time * 0.9, sz: 8, c: {r: 255, g: 150, b: 100}}, {r: 350, a: time * 0.5, sz: 12, c: {r: 100, g: 180, b: 255}} ];
+                for (let p of planets) {
+                    let px_p = Math.cos(p.a) * p.r; let py_p = Math.sin(p.a) * p.r * tilt;
+                    let d = Math.sqrt((px - (cx + px_p))**2 + (py - (cy + py_p))**2);
+                    if (d < p.sz) return { b: 2.0, c: p.c }; 
+                    if (Math.abs(dist3d - p.r) < p.sz * 1.8) return { b: 0.02, c: {r:0, g:0, b:0} }; // Sweep path
+                }
+            }
+            if (currentState === 2) { // Ultra-Realistic 3D Earth Cooling
+                let time = gameFrame * 0.015;
+                let sphereR = 210;
+                
+                if (dist < sphereR) {
+                    // 3D Volumetric Mapping
+                    let z = Math.sqrt(sphereR*sphereR - dx*dx - dy*dy);
+                    let nx = dx/sphereR, ny = dy/sphereR, nz = z/sphereR;
+                    
+                    // Rotate mapping
+                    let rotY = nx * Math.cos(time) - nz * Math.sin(time);
+                    let rotZ = nx * Math.sin(time) + nz * Math.cos(time);
+                    
+                    let n = tex(rotY * 4, ny * 4, time * 0.1);
+                    let isCrust = n < -0.1;
+                    let isMagma = n > 0.4;
+                    
+                    let col = isCrust ? {r: 30, g: 30, b: 35} : {r: 255, g: 50, b: 10}; 
+                    if (isMagma) col = {r: 255, g: 150, b: 40};
+                    
+                    // 3D Lighting (Directional + Ambient)
+                    let lx = -0.6, ly = -0.6, lz = 0.5;
+                    let dot = Math.max(0, nx*lx + ny*ly + nz*lz);
+                    let shade = 0.15 + 0.85 * dot; 
+                    
+                    // Subsurface Scattering Rim
+                    let rim = Math.pow(1 - nz, 3) * 0.6;
+                    if (rim > 0.3) col = {r: 255, g: 100 + rim*100, b: 50};
+                    
+                    return { b: shade + rim, c: col };
+                }
+                // Atmosphere Glow
+                if (dist >= sphereR && dist < sphereR + 35) {
+                    return { b: (1 - (dist - sphereR) / 35) * 0.8, c: {r: 255, g: 90, b: 30} };
+                }
+                
+                let star = Math.sin(px * 0.15) * Math.cos(py * 0.15);
+                if (star > 0.998) return { b: 0.8, c: {r:255, g:255, b:255} };
+            }
+            return { b: 0 };
+        }
+
+        function update() {
+            gameFrame++; stateTimer++;
+            switch(currentState) {
+                case 0: 
+                    if (stateTimer === 10) showUI(0); if (stateTimer === DUR) showUI(1);
+                    if (stateTimer > DUR * 2) { currentState = 1; stateTimer = 0; } break;
+                case 1:
+                    if (stateTimer === 10) showUI(2); if (stateTimer === DUR) showUI(3);
+                    if (stateTimer > DUR * 2) { currentState = 2; stateTimer = 0; } break;
+                case 2:
+                    if (stateTimer === 10) showUI(4); if (stateTimer === DUR) showUI(5);
+                    if (stateTimer > DUR * 4) { showUI(-1); goToSection(4); } break; // SLIDESHOW ADVANCE
+            }
+        }
+
+        function draw() {
+            if (isActive) {
+                ctx.fillStyle = "black"; ctx.fillRect(0, 0, width, height); update();
+                const len = pixels.length;
+                for (let i = 0; i < len; i++) {
+                    const p = pixels[i]; const res = getPixelState(p.x, p.y);
+                    p.brightness = res.b || 0; p.color = res.c || {r: 255, g: 255, b: 255}; 
+                    p.draw(ctx);
+                }
+            }
+            requestAnimationFrame(draw);
+        }
+
+        window.addEventListener('resize', initGrid);
+        window.sectionObservers['sec-10-12'] = {
+            onEnter: () => { isActive = true; currentState = 0; stateTimer = 0; gameFrame = 0; showUI(-1); initGrid(); },
+            onLeave: () => { isActive = false; }
+        };
+        draw();
+    })();
+
+    /* =========================================================
+       CHAPTER 13-15 (13-15.html) - LIFE
+       ========================================================= */
+    (function() {
+        const canvas = document.getElementById('canvas-13-15');
+        const ctx = canvas.getContext('2d', { alpha: false });
+        const uiElements = Array.from({length: 10}, (_, i) => document.getElementById(`s13-nar-${i+1}`));
+        let isActive = false;
+        let width, height; let pixels =[]; const spacing = 3.5; 
+        let gameFrame = 0; let currentState = 0; let stateTimer = 0; const SCENE_DURATION = 480; 
+
+        function initGrid() {
+            width = canvas.width = window.innerWidth; height = canvas.height = window.innerHeight; pixels =[];
+            for (let x = 0; x < width; x += spacing) { for (let y = 0; y < height; y += spacing) pixels.push(new HighResPixel(x, y)); }
+        }
+
+        function drawJellyfish(px, py, jX, jY, pulse, time, scale = 1.0) {
+            let dx = px - jX; let dy = py - jY; let d = Math.sqrt(dx*dx + dy*dy);
+            let b = 0; let color = {r: 100, g: 180, b: 255};
+            let headRadius = (45 + pulse * 15) * scale;
+            
+            // 3D Shading for the bell
+            if (d < headRadius && py < jY + (12 * scale)) {
+                let z = Math.sqrt(headRadius*headRadius - d*d);
+                let zNorm = z / headRadius;
+                let intensity = (1 - d/headRadius) + zNorm*0.5; // Volumetric glow
+                b = 0.9 + intensity * 0.8; 
+                color = {r: 150 + pulse * 60, g: 230, b: 255};
+                return {b, c: color};
+            }
+            // Tentacles
+            if (px > jX - headRadius && px < jX + headRadius && py >= jY) {
+                for(let i = -3; i <= 3; i++) {
+                    let tX = jX + (i * 12 * scale); let wave = Math.sin(py * 0.05 - time * 5 + i) * (12 * scale);
+                    let distToTentacle = Math.abs(px - (tX + wave)); let tentacleLength = (120 + pulse * 45) * scale;
+                    if (distToTentacle < 3 * scale && py < jY + tentacleLength) {
+                        let fade = 1 - (py - jY) / tentacleLength; 
+                        b = fade * 1.2; color = {r: 120, g: 200, b: 255};
+                        return {b, c: color};
+                    }
+                }
+            }
+            return null;
+        }
+
+        function showUI(index) { uiElements.forEach((el, i) => { el.classList.toggle('active', i === index); }); }
+
+        function getPixelState(px, py) {
+            const time = gameFrame * 0.02;
+            if (currentState === 0) {
+                let flow1 = Math.sin(px * 0.005 + time) * 100; let flow2 = Math.cos(py * 0.005 + time * 1.2) * 100;
+                let distToInteraction = Math.abs((py - height/2) - flow1) + Math.abs((px - width/2) - flow2);
+                let b = 0.05; let color = {r: 20, g: 45, b: 100};
+                if (stateTimer > 180) {
+                    let pulse = (Math.sin(time * 3) + 1) * 0.5; let jX = width/2 + Math.sin(time * 0.5) * 50; let jY = height/2 + Math.cos(time * 0.3) * 30;
+                    let res = drawJellyfish(px, py, jX, jY, pulse, time, 1.2); if (res) return res;
+                }
+                if (distToInteraction < 60) b = Math.max(b, (1 - distToInteraction/60) * 0.45); return { b, c: color };
+            }
+            if (currentState === 1) {
+                let b = 0.04; let color = {r: 40, g: 60, b: 80};
+                for (let i = 0; i < 6; i++) {
+                    let seed = i * 123.456; let cycleTime = time * 0.4 + seed;
+                    let jX = (width * 0.1) + ((time * 40 + seed * 10) % (width * 0.8)); let jY = (height * 0.15) + (Math.sin(cycleTime) * height * 0.2) + (i * 70);
+                    let pulse = (Math.sin(time * 4 + seed) + 1) * 0.5; let res = drawJellyfish(px, py, jX, jY, pulse, time, 0.7); 
+                    if (res) { res.c.r += Math.sin(seed) * 40; res.c.g += Math.cos(seed) * 40; return res; }
+                }
+                if (Math.sin(px*py + time) > 0.998) { b = 0.4; color = {r:200, g:220, b:255}; }
+                return { b, c: color };
+            }
+            if (currentState === 2) {
+                let b = 0.05; let color = {r: 20, g: 140, b: 190};
+                for (let i = 0; i < 9; i++) {
+                    let xBase = (width / 10) * (i + 1); let drift = Math.sin(py * 0.008 + time + i) * 50; let actualX = xBase + drift;
+                    let distToMain = Math.abs(px - actualX);
+                    if (distToMain < 10) {
+                        let flow = (Math.sin(py * 0.03 - time * 12) + 1) * 0.5;
+                        // 3D tube lighting
+                        let zTube = Math.sqrt(100 - distToMain*distToMain)/10;
+                        b = 0.7 + flow * 0.6 * zTube; color = {r: 130, g: 200 + flow * 40, b: 240};
+                    }
+                    let branchSide = i % 2 === 0 ? 1 : -1; let branchTrigger = Math.sin(py * 0.04 + i + time*0.5) > 0.65;
+                    if (branchTrigger) {
+                        let branchX = actualX + (branchSide * 55 * Math.sin(time + py*0.01)); let distToBranch = Math.abs(px - branchX);
+                        if (distToBranch < 5) b = Math.max(b, 0.55 * Math.sqrt(25-distToBranch*distToBranch)/5);
+                    }
+                }
+                return { b, c: color };
+            }
+            return { b: 0 };
+        }
+
+        function update() {
+            gameFrame++; stateTimer++; const QUARTER = SCENE_DURATION / 4;
+            switch(currentState) {
+                case 0: 
+                    if (stateTimer === 1) showUI(0); if (stateTimer === QUARTER) showUI(1);
+                    if (stateTimer === QUARTER * 2) showUI(2); if (stateTimer === QUARTER * 3) showUI(3);
+                    if (stateTimer >= SCENE_DURATION) { currentState = 1; stateTimer = 0; } break;
+                case 1: 
+                    if (stateTimer === 1) showUI(4); if (stateTimer === QUARTER * 1.3) showUI(5);
+                    if (stateTimer === QUARTER * 2.6) showUI(6); if (stateTimer >= SCENE_DURATION) { currentState = 2; stateTimer = 0; } break;
+                case 2: 
+                    if (stateTimer === 1) showUI(7); if (stateTimer === QUARTER * 1.3) showUI(8);
+                    if (stateTimer === QUARTER * 2.6) showUI(9); if (stateTimer >= SCENE_DURATION) { showUI(-1); goToSection(5); } break; // SLIDESHOW ADVANCE
+            }
+        }
+
+        function draw() {
+            if (isActive) {
+                ctx.fillStyle = "#050508"; ctx.fillRect(0, 0, width, height); update();
+                for (let i = 0; i < pixels.length; i++) {
+                    const p = pixels[i]; const res = getPixelState(p.x, p.y);
+                    p.brightness = res.b || 0; p.color = res.c || {r: 255, g: 255, b: 255}; 
+                    p.draw(ctx);
+                }
+            }
+            requestAnimationFrame(draw);
+        }
+
+        window.addEventListener('resize', initGrid);
+        window.sectionObservers['sec-13-15'] = {
+            onEnter: () => { isActive = true; currentState = 0; stateTimer = 0; gameFrame = 0; showUI(-1); initGrid(); },
+            onLeave: () => { isActive = false; }
+        };
+        draw();
+    })();
+
+    /* =========================================================
+       CHAPTER 16 (16.html) - DINOSAURS
+       ========================================================= */
+    (function() {
+        const canvas = document.getElementById('canvas-16');
+        const ctx = canvas.getContext('2d');
+        const uiElements =[document.getElementById('s16-nar-1'), document.getElementById('s16-nar-2'), document.getElementById('s16-nar-3')];
+        let isActive = false;
+        let width, height; let pixels =[]; const spacing = 3.5; let gameFrame = 0; let stateTimer = 0; let groundY;
+        let dino = { x: 120, y: 0, vy: 0, gravity: 1.4, jumpPower: -20, isJumping: false };
+        let obstacles =[]; let clouds = []; let scrollSpeed = 12;
+
+        const DINO_BODY =[ "                ████████", "                ███ ████", "                ████████", "                ████████", "                ████████", "                ██████  ", "                ████████", "█              ████████ ", "█             ████████  ", "██           ████████   ", "███         ██████████  ", "████      ████████████  ", "█████    █████████████  ", "██████████████████████  ", " █████████████████████  ", "  ████████████████████  ", "   ██████████████████   ", "    ████████████████    ", "     ██████████████     ", "      ████████████      " ];
+        const LEG_STILL =[ "        █████  ███      ", "        ███    ███      ", "        ███    ███      " ];
+        const LEG_LEFT_UP =[ "        █████  ███      ", "               ███      ", "               ███      " ];
+        const LEG_RIGHT_UP =[ "        ███    █████    ", "        ███             ", "        ███             " ];
+        const CACTUS_SPRITE =[ "    ████    ", "    ████    ", "██  ████  ██", "██  ████  ██", "████████████", "    ████    ", "    ████    ", "    ████    " ];
+        const CLOUD_STRUCTURE =[ "            ███████         ", "        ████       ███      ", "     ███              ██    ", "   ██                   ██  ", " ███                     ██ ", "███                       ██", " ██████████████████████████ " ];
+
+        function initGrid() {
+            width = canvas.width = window.innerWidth; height = canvas.height = window.innerHeight;
+            groundY = height * 0.6; dino.y = groundY - 80; pixels =[];
+            for (let x = 0; x < width; x += spacing) { for (let y = 0; y < height; y += spacing) pixels.push(new HighResPixel(x, y)); }
+        }
+
+        function showUI(index) { uiElements.forEach((el, i) => { if (i === index) el.classList.add('active'); else el.classList.remove('active'); }); }
+
+        function update() {
+            gameFrame++; stateTimer++; const DURATION = 300;
+            if (stateTimer === 10) showUI(0); if (stateTimer === DURATION) showUI(1);
+            if (stateTimer === DURATION * 2) showUI(2); if (stateTimer === DURATION * 3 + 100) { stateTimer = 0; showUI(-1); goToSection(6); } // SLIDESHOW ADVANCE
+
+            if (!dino.isJumping) {
+                obstacles.forEach(obs => { if (obs.x - dino.x < 180 && obs.x > dino.x) { dino.isJumping = true; dino.vy = dino.jumpPower; } });
+            } else {
+                dino.y += dino.vy; dino.vy += dino.gravity;
+                if (dino.y >= groundY - 88) { dino.y = groundY - 88; dino.isJumping = false; dino.vy = 0; }
+            }
+
+            if (gameFrame % 85 === 0) obstacles.push({ x: width + 50 });
+            obstacles.forEach(o => o.x -= scrollSpeed); obstacles = obstacles.filter(o => o.x > -100);
+            if (gameFrame % 140 === 0) clouds.push({ x: width + 50, y: 60 + Math.random() * 100, speed: 1.2 + Math.random() * 0.8, scale: 4 });
+            clouds.forEach(c => c.x -= c.speed); clouds = clouds.filter(c => c.x > -300);
+        }
+
+        function checkDinoPixel(px, py) {
+            const pixelSize = 3.8; let nx = Math.floor((px - dino.x) / pixelSize); let ny = Math.floor((py - dino.y) / pixelSize);
+            if (nx < 0 || nx >= 24) return false;
+            if (ny >= 0 && ny < DINO_BODY.length) return DINO_BODY[ny][nx] === '█' ? {nx, ny, t: 'body'} : false;
+            let legY = ny - DINO_BODY.length;
+            if (legY >= 0 && legY < 3) {
+                let isSolid = dino.isJumping ? LEG_STILL[legY][nx] === '█' : ((Math.floor(gameFrame / 5) % 2 === 0) ? LEG_LEFT_UP : LEG_RIGHT_UP)[legY][nx] === '█';
+                return isSolid ? {nx, ny, t: 'leg'} : false;
+            }
+            return false;
+        }
+
+        function checkCactusPixel(px, py, cx) {
+            let nx = Math.floor((px - cx) / 4.5); let ny = Math.floor((py - (groundY - 35)) / 4.5);
+            if (nx < 0 || nx >= 12 || ny < 0 || ny >= 8) return false; return CACTUS_SPRITE[ny][nx] === '█' ? {nx, ny} : false;
+        }
+
+        function checkCloudPixel(px, py, cloud) {
+            let nx = Math.floor((px - cloud.x) / cloud.scale); let ny = Math.floor((py - cloud.y) / cloud.scale);
+            const rows = CLOUD_STRUCTURE.length; const cols = CLOUD_STRUCTURE[0].length;
+            if (nx < 0 || nx >= cols || ny < 0 || ny >= rows) return false;
+            if (CLOUD_STRUCTURE[ny][nx] !== '█') return false;
+            let edge = (nx === 0 || nx === cols - 1 || ny === 0 || ny === rows - 1 || CLOUD_STRUCTURE[ny-1][nx] === ' ' || CLOUD_STRUCTURE[ny+1][nx] === ' ' || CLOUD_STRUCTURE[ny][nx-1] === ' ' || CLOUD_STRUCTURE[ny][nx+1] === ' ');
+            return { edge };
+        }
+
+        function updatePixel(p) {
+            p.brightness = 0; p.color = { r: 255, g: 255, b: 255 };
+            let dPixel = checkDinoPixel(p.x, p.y);
+            if (dPixel) { 
+                // 3D Shading map based on sprite X/Y
+                let shadow = 1 - (dPixel.nx / 24) * 0.4 - (dPixel.ny / 23) * 0.3;
+                p.brightness = 1.2 * shadow; 
+                p.color = {r:200, g:210, b:220};
+                return; 
+            }
+            if (Math.abs(p.y - groundY) < 1.5 && (p.x + gameFrame * scrollSpeed) % 180 < 120) { p.brightness = 0.5; p.color={r:150,g:150,b:150}; return; }
+            for (let obs of obstacles) { 
+                let cPixel = checkCactusPixel(p.x, p.y, obs.x);
+                if (cPixel) { 
+                    let shadow = 1 - (cPixel.nx / 12) * 0.4;
+                    p.brightness = 1.1 * shadow; p.color = { r: 120, g: 255, b: 120 }; return; 
+                } 
+            }
+            for (let c of clouds) { 
+                let clPixel = checkCloudPixel(p.x, p.y, c);
+                if (clPixel) { p.brightness = clPixel.edge ? 0.35 : 0.2; return; } 
+            }
+        }
+
+        function draw() {
+            if (isActive) {
+                ctx.fillStyle = "black"; ctx.fillRect(0, 0, width, height); update();
+                for (let i = 0; i < pixels.length; i++) { updatePixel(pixels[i]); pixels[i].draw(ctx); }
+            }
+            requestAnimationFrame(draw);
+        }
+
+        window.addEventListener('resize', initGrid);
+        window.sectionObservers['sec-16'] = {
+            onEnter: () => { isActive = true; stateTimer = 0; gameFrame = 0; showUI(-1); obstacles=[]; clouds=[]; initGrid(); dino.y = groundY-80; },
+            onLeave: () => { isActive = false; }
+        };
+        draw();
+    })();
+
+    /* =========================================================
+       CHAPTER 17-18 (17-18.html) - IMPACT
+       ========================================================= */
+    (function() {
+        const canvas = document.getElementById('canvas-17-18');
+        const ctx = canvas.getContext('2d');
+        const uiElements = Array.from({length:8}, (_, i) => document.getElementById(`s17-nar-${i+1}`));
+        let isActive = false;
+        let width, height; let pixels =[]; const spacing = 3.5; 
+        let currentChapter = 6; let stateTimer = 0; let shake = 0; let globalAlpha = 1;
+        let asteroid = { x: 0, y: 0, z: 2000, targetX: 0, targetY: 0, size: 5, trail:[] };
+        let impacted = false; let impactProgress = 0; let creatures = []; let fireflies =[];
+
+        function initGrid() {
+            width = canvas.width = window.innerWidth; height = canvas.height = window.innerHeight; pixels =[];
+            for (let x = 0; x < width; x += spacing) { for (let y = 0; y < height; y += spacing) pixels.push(new HighResPixel(x, y)); }
+            resetAsteroid(); initLife();
+        }
+
+        function resetAsteroid() {
+            asteroid.z = 1500; asteroid.x = width * 1.2; asteroid.y = -height * 0.2; asteroid.targetX = width * 0.3; asteroid.targetY = height * 0.85;
+            asteroid.trail =[]; impacted = false; impactProgress = 0;
+        }
+
+        function initLife() {
+            creatures =[];
+            for(let i=0; i < 9; i++) {
+                creatures.push({ originX: width * (0.15 + Math.random() * 0.7), originY: height * (0.75 + Math.random() * 0.15), x: 0, y: 0, size: 6 + Math.random() * 6, eyeGlow: 0, blinkTimer: Math.random() * 100, isBlinking: false, emergence: 0, active: false, startTime: 100 + (i * 90), breathPhase: Math.random() * Math.PI * 2 });
+                creatures[i].x = creatures[i].originX; creatures[i].y = creatures[i].originY;
+            }
+            fireflies =[];
+            for(let i=0; i < 25; i++) { fireflies.push({ x: Math.random() * width, y: Math.random() * height, vx: (Math.random() - 0.5) * 1.5, vy: (Math.random() - 0.5) * 1.5, brightness: 0, phase: Math.random() * Math.PI * 2, pulseSpeed: 0.02 + Math.random() * 0.04 }); }
+        }
+
+        function showUI(index) { uiElements.forEach((el, i) => { if (i === index) el.classList.add('active'); else el.classList.remove('active'); }); }
+
+        function update() {
+            stateTimer++;
+            if (currentChapter === 6) {
+                if (stateTimer === 10) showUI(0); if (stateTimer === 160) showUI(1);
+                if (!impacted) {
+                    asteroid.z -= 12; let progress = (1500 - asteroid.z) / 1500;
+                    asteroid.currentX = asteroid.x + (asteroid.targetX - asteroid.x) * progress; asteroid.currentY = asteroid.y + (asteroid.targetY - asteroid.y) * progress; asteroid.currentSize = 2 + progress * 65;
+                    asteroid.trail.push({ x: asteroid.currentX, y: asteroid.currentY, size: asteroid.currentSize, life: 1 });
+                    if (asteroid.trail.length > 35) asteroid.trail.shift();
+                    if (asteroid.z <= 0) { impacted = true; showUI(2); shake = 80; stateTimer = 0; }
+                } else {
+                    impactProgress += 0.0035; shake *= 0.93; if (stateTimer === 60) showUI(3);
+                    if (impactProgress > 2.8) { currentChapter = 7; stateTimer = 0; globalAlpha = 0; showUI(-1); }
+                }
+            } else if (currentChapter === 7) {
+                if (globalAlpha < 1) globalAlpha += 0.005;
+                if (stateTimer === 60) showUI(4); if (stateTimer === 220) showUI(5); if (stateTimer === 380) showUI(6); if (stateTimer === 540) showUI(7);
+                creatures.forEach(c => {
+                    if (stateTimer > c.startTime) {
+                        c.active = true; if (c.emergence < 1) c.emergence += 0.004;
+                        c.blinkTimer--; if (c.blinkTimer <= 0) { c.isBlinking = !c.isBlinking; c.blinkTimer = c.isBlinking ? 8 : 120 + Math.random() * 250; }
+                        c.breathPhase += 0.035; c.y = c.originY - (c.emergence * 8) + Math.sin(c.breathPhase) * 1.5;
+                        c.eyeGlow = !c.isBlinking ? Math.min(1, c.eyeGlow + 0.04) : 0;
+                    }
+                });
+                fireflies.forEach(f => {
+                    f.x += f.vx + Math.sin(stateTimer * 0.02 + f.phase) * 0.4; f.y += f.vy + Math.cos(stateTimer * 0.02 + f.phase) * 0.4;
+                    f.phase += f.pulseSpeed; f.brightness = (Math.sin(f.phase) + 1) / 2;
+                    if (f.x < 0) f.x = width; if (f.x > width) f.x = 0; if (f.y < 0) f.y = height; if (f.y > height) f.y = 0;
+                });
+                if (stateTimer > 1100) { showUI(-1); goToSection(7); } // SLIDESHOW ADVANCE
+            }
+        }
+
+        function updatePixel(p) {
+            p.brightness = 0; p.color = {r:255, g:255, b:255};
+            let rx = p.x; let ry = p.y;
+            if (shake > 0) { rx += (Math.random() - 0.5) * shake; ry += (Math.random() - 0.5) * shake; }
+
+            if (currentChapter === 6) {
+                if (ry > height * 0.75) {
+                    let groundDepth = (ry - height * 0.75) / (height * 0.25);
+                    if (!impacted) {
+                        let dither = (Math.sin(rx * 0.2) + Math.cos(ry * 0.2 + stateTimer * 0.01)) * 0.1; 
+                        p.brightness = 0.15 + groundDepth * 0.2 + dither; p.color = {r:30 + groundDepth*20, g:30 + groundDepth*10, b:40};
+                    } else {
+                        let heat = Math.max(0, 1 - (impactProgress * 0.8)); let wave = Math.sin(rx * 0.05 - impactProgress * 20) * 0.1;
+                        p.brightness = (0.3 + heat * 1.2) + wave; p.color = {r: 255, g: 40 + (1 - heat) * 100, b: 20};
+                    }
+                }
+                if (!impacted) {
+                    const dx = rx - asteroid.currentX; const dy = ry - asteroid.currentY; const distSq = dx * dx + dy * dy;
+                    if (distSq < asteroid.currentSize * asteroid.currentSize) { p.brightness = 2; p.color = {r:255, g:240, b:210}; return; }
+                    for (let i = 0; i < asteroid.trail.length; i++) {
+                        const t = asteroid.trail[i]; const tdx = rx - t.x; const tdy = ry - t.y; const tDistSq = tdx * tdx + tdy * tdy;
+                        let trailRatio = i / asteroid.trail.length; let tSize = t.size * (0.85 + trailRatio * 0.6);
+                        if (tDistSq < tSize * tSize) { p.brightness = trailRatio * 1.2; p.color = {r:255, g:60 + trailRatio*160, b:40}; }
+                    }
+                } else {
+                    const bx = asteroid.targetX; const by = asteroid.targetY; const bdx = rx - bx; const bdy = ry - by;
+                    const bDist = Math.sqrt(bdx * bdx + bdy * bdy); const wavePos = impactProgress * width * 2.8; const waveWidth = 220 * (1 + impactProgress);
+                    if (bDist < wavePos && bDist > wavePos - waveWidth) { let edge = (wavePos - bDist) / waveWidth; p.brightness = Math.pow(edge, 0.4) * 2; p.color = {r:255, g:210 + edge*45, b:160}; return; }
+                    if (bDist < wavePos) {
+                        let fade = Math.max(0, 1 - impactProgress * 1.15);
+                        if (Math.random() < fade * 0.5) { p.brightness = fade * (0.8 + Math.random() * 0.5); p.color = {r:255, g:110 + Math.random()*110, b:20}; }
+                        else { let dust = Math.max(0, fade - 0.25); p.brightness = Math.random() < 0.15 ? dust * 0.35 : 0; p.color = {r:110, g:110, b:110}; }
+                    }
+                }
+            } else {
+                if (ry > height * 0.72) {
+                    let depth = (ry - height * 0.72) / (height * 0.28); let noise = Math.sin(rx * 0.08) * Math.cos(ry * 0.12) * 0.04;
+                    p.brightness = 0.08 + depth * 0.2 + noise; p.color = {r:45 + depth*35, g:50 + depth*30, b:70 + depth*45};
+                    creatures.forEach(c => { let distSq = (rx - c.originX)**2 + (ry - c.originY)**2; if (distSq < (c.size * 2.6)**2) p.brightness *= (0.15 + Math.min(1, Math.sqrt(distSq) / (c.size * 2.6)) * 0.85); });
+                    creatures.forEach(c => { if (c.active && (rx - c.x)**2 + ((ry - c.y)*2)**2 < (c.size * c.emergence)**2) { p.brightness = 0.06 + (1 - c.emergence) * 0.15; p.color = {r:22, g:22, b:28}; } });
+                    creatures.forEach(c => { if (c.active && c.eyeGlow > 0) { let lightDist = Math.sqrt((rx - c.x)**2 + (ry - (c.y + 10))**2); if (lightDist < 45) { let lightPower = (1 - lightDist / 45) * 0.4 * c.eyeGlow; p.brightness += lightPower; p.color.r += lightPower * 110; p.color.g += lightPower * 160; } } });
+                }
+                fireflies.forEach(f => { let distSq = (rx - f.x)**2 + (ry - f.y)**2; if (distSq < 5) { p.brightness = f.brightness*1.5; p.color = {r:255, g:255, b:160}; } else if (distSq < 150) { let halo = (1 - Math.sqrt(distSq) / 12) * 0.4 * f.brightness; if (halo > 0) { p.brightness += halo; p.color.r = Math.min(255, p.color.r + halo * 210); p.color.g = Math.min(255, p.color.g + halo * 210); } } });
+                creatures.forEach(c => { if (!c.active || c.isBlinking) return; let eyeSpacing = c.size * 0.48; [ -eyeSpacing, eyeSpacing ].forEach(offsetX => { if ((rx - (c.x + offsetX))**2 + (ry - (c.y - 2))**2 < 6) { p.brightness = 1.2 * c.eyeGlow; p.color = {r:190, g:255, b:110}; } }); });
+                let fogNoise = Math.sin(rx * 0.005 + stateTimer * 0.02) * Math.cos(ry * 0.01 - stateTimer * 0.01);
+                if (ry < height * 0.85) { let fogDensity = Math.max(0, fogNoise * 0.16); p.brightness += fogDensity; p.color.r = Math.min(255, p.color.r + fogDensity * 55); p.color.g = Math.min(255, p.color.g + fogDensity * 65); p.color.b = Math.min(255, p.color.b + fogDensity * 85); }
+            }
+            if (p.brightness < 0.05 && ry < height * 0.65) { if (Math.sin(rx * 0.15) * Math.cos(ry * 0.15) > 0.9994) { p.brightness = 0.3; p.color = {r:160, g:180, b:220}; } }
+            p.brightness *= globalAlpha;
+        }
+
+        function draw() {
+            if (isActive) {
+                ctx.fillStyle = "black"; ctx.fillRect(0, 0, width, height); update();
+                for (let i = 0; i < pixels.length; i++) { updatePixel(pixels[i]); pixels[i].draw(ctx); }
+            }
+            requestAnimationFrame(draw);
+        }
+
+        window.addEventListener('resize', initGrid);
+        window.sectionObservers['sec-17-18'] = {
+            onEnter: () => { isActive = true; currentChapter = 6; stateTimer = 0; globalAlpha = 1; resetAsteroid(); initLife(); showUI(-1); initGrid(); },
+            onLeave: () => { isActive = false; }
+        };
+        draw();
+    })();
+
+    /* =========================================================
+       CHAPTER 19-20 (19-20.html) - MIND
+       ========================================================= */
+    (function() {
+        const canvas = document.getElementById('canvas-19-20');
+        const ctx = canvas.getContext('2d');
+        const uiElements = Array.from({length:6}, (_, i) => document.getElementById(`s19-nar-${i+1}`));
+        let isActive = false;
+        let width, height, centerX, centerY; let pixels =[]; const spacing = 3.5; let stateTimer = 0; let activeScene = 'mammals';
+        let arrows = []; let fireParticles =[];
+
+        function initGrid() {
+            width = canvas.width = window.innerWidth; height = canvas.height = window.innerHeight;
+            centerX = width / 2; centerY = height / 2; pixels =[];
+            for (let x = 0; x < width; x += spacing) { for (let y = 0; y < height; y += spacing) pixels.push(new HighResPixel(x, y)); }
+        }
+
+        function showUI(index) { uiElements.forEach((el, i) => { if (i === index) el.classList.add('active'); else el.classList.remove('active'); }); }
+
+        function checkChibiStickman(px, py, person) {
+            const { x, y, scale, type } = person; const headR = 25 * scale; const headY = y - 55 * scale;
+            if (Math.sqrt((px - x)**2 + (py - headY)**2) < headR && Math.sqrt((px - x)**2 + (py - headY)**2) > headR - 2.5) return true;
+            if (type === 'builder' || type === 'casual') { const hatH = 35 * scale; const localY = py - (headY - headR + 4); if (localY < 0 && localY > -hatH) { const widthAtY = (headR * 1.8 * (localY + hatH)) / hatH; if (Math.abs(px - x) < widthAtY / 2) return true; } }
+            const bodyH = 22 * scale; if (Math.abs(px - x) < 1.5 * scale && py >= headY + headR - 2 && py <= headY + headR + bodyH) return true;
+            const armY = headY + headR + 8 * scale;
+            if (type === 'hunter') {
+                const pullProgress = Math.sin(stateTimer * 0.08) * 0.5 + 0.5; const bowX = x + 35 * scale; const pullX = x - (pullProgress * 15 * scale);
+                if (lineDist(px, py, x, armY, pullX, armY) < 1.8) return true; if (lineDist(px, py, x, armY, bowX, armY) < 1.8) return true;
+                const arcR = 45 * scale; const arcCX = bowX - arcR + (pullProgress * 5); const arcDist = Math.sqrt((px - arcCX)**2 + (py - armY)**2); const angle = Math.atan2(py - armY, px - arcCX);
+                if (Math.abs(arcDist - arcR) < 2 && Math.abs(angle) < 1.1) return true;
+                const topTipY = armY - Math.sin(1.1) * arcR; const topTipX = arcCX + Math.cos(1.1) * arcR; const botTipY = armY + Math.sin(1.1) * arcR; const botTipX = arcCX + Math.cos(1.1) * arcR;
+                if (lineDist(px, py, pullX, armY, topTipX, topTipY) < 1) return true; if (lineDist(px, py, pullX, armY, botTipX, botTipY) < 1) return true;
+            } else if (type === 'firemaker') {
+                const rub = Math.sin(stateTimer * 0.8) * 10;
+                if (lineDist(px, py, x, armY, x - 15*scale, armY + 20 + rub) < 1.8) return true; if (lineDist(px, py, x, armY, x + 15*scale, armY + 20 + rub) < 1.8) return true;
+            } else {
+                if (lineDist(px, py, x, armY, x - 20*scale, armY + 15*scale) < 1.8) return true; if (lineDist(px, py, x, armY, x + 20*scale, armY + 15*scale) < 1.8) return true;
+            }
+            const legY = headY + headR + bodyH; const walk = type === 'builder' ? Math.sin(stateTimer * 0.12) * 12 : 0;
+            if (lineDist(px, py, x, legY, x - 12 - walk, legY + 20) < 2) return true; if (lineDist(px, py, x, legY, x + 12 + walk, legY + 20) < 2) return true;
+            if (type === 'builder') {
+                const wx = x + 60 * scale; const wy = legY + 10; const wd = Math.sqrt((px - wx)**2 + (py - wy)**2);
+                if (Math.abs(wd - 25*scale) < 2.5) return true;
+                const rot = stateTimer * 0.1;
+                if (Math.abs((px-wx)*Math.sin(rot) - (py-wy)*Math.cos(rot)) < 1.5 && wd < 25*scale) return true;
+                if (Math.abs((px-wx)*Math.cos(rot) + (py-wy)*Math.sin(rot)) < 1.5 && wd < 25*scale) return true;
+            }
+            return false;
+        }
+
+        function lineDist(x, y, x1, y1, x2, y2) {
+            const A = x - x1, B = y - y1, C = x2 - x1, D = y2 - y1; const dot = A * C + B * D, lenSq = C * C + D * D;
+            let p = -1; if (lenSq !== 0) p = dot / lenSq; let xx, yy;
+            if (p < 0) { xx = x1; yy = y1; } else if (p > 1) { xx = x2; yy = y2; } else { xx = x1 + p * C; yy = y1 + p * D; }
+            return Math.sqrt((x-xx)**2 + (y-yy)**2);
+        }
+
+        function update() {
+            stateTimer++;
+            if (stateTimer < 400) { activeScene = 'mammals'; if (stateTimer === 20) showUI(0); if (stateTimer === 200) showUI(1); }
+            else if (stateTimer < 900) { activeScene = 'hunter'; if (stateTimer === 410) showUI(2); if (stateTimer % 100 === 0) arrows.push({ x: centerX + 40, y: centerY - 15, vx: 20, vy: -6 }); }
+            else if (stateTimer < 1400) { activeScene = 'wheel'; if (stateTimer === 910) showUI(3); if (stateTimer === 1150) showUI(4); }
+            else if (stateTimer < 1900) { activeScene = 'fire'; if (stateTimer === 1410) showUI(5); }
+            else { stateTimer = 0; arrows =[]; goToSection(8); } // SLIDESHOW ADVANCE
+
+            arrows.forEach((a, i) => { a.x += a.vx; a.y += a.vy; a.vy += 0.22; if (a.x > width || a.y > height) arrows.splice(i, 1); });
+            if (activeScene === 'fire') { for(let i=0; i<6; i++) fireParticles.push({ x: centerX + (Math.random() - 0.5) * 30, y: centerY + 65, vx: (Math.random() - 0.5) * 2, vy: -Math.random() * 8 - 4, life: 1.0, size: 20 + Math.random() * 20 }); }
+            fireParticles.forEach((p, i) => { p.x += p.vx; p.y += p.vy; p.life -= 0.05; if (p.life <= 0) fireParticles.splice(i, 1); });
+        }
+
+        function updatePixel(p) {
+            p.brightness = 0; p.color = {r:255, g:255, b:255};
+            if (p.y > centerY + 80) { let depth = (p.y - (centerY + 80)) / (height - (centerY + 80)); p.brightness = 0.1 + depth * 0.15; p.color = {r:30, g:35, b:40}; }
+            if (activeScene === 'mammals') { [ -200, 0, 200 ].forEach((offset, i) => { let cx = centerX + offset + Math.sin(stateTimer * 0.04 + i) * 20; let cy = centerY + 45; if (Math.sqrt((p.x-cx)**2 + (p.y-cy)**2) < 30 + i*5) { p.brightness = 0.3; p.color = {r:60, g:55, b:55}; } }); }
+            if (activeScene === 'hunter') { if (checkChibiStickman(p.x, p.y, { x: centerX, y: centerY + 40, scale: 1.2, type: 'hunter' })) p.brightness = 1.2; arrows.forEach(a => { if (lineDist(p.x, p.y, a.x, a.y, a.x - 25, a.y - (a.vy*0.8)) < 2) p.brightness = 1.2; }); }
+            if (activeScene === 'wheel') { if (checkChibiStickman(p.x, p.y, { x: centerX - 80, y: centerY + 40, scale: 1.2, type: 'builder' })) p.brightness = 1.2; }
+            if (activeScene === 'fire') {
+                if (checkChibiStickman(p.x, p.y, { x: centerX - 140, y: centerY + 40, scale: 1.2, type: 'firemaker' })) p.brightness = 1.2; if (checkChibiStickman(p.x, p.y, { x: centerX + 140, y: centerY + 40, scale: 1.2, type: 'casual' })) p.brightness = 1.2;
+                fireParticles.forEach(fp => { let distSq = (p.x - fp.x)**2 + (p.y - fp.y)**2; let flameSize = fp.size * fp.life; if (distSq < flameSize * flameSize) { let f = (1 - Math.sqrt(distSq)/flameSize); p.brightness += f * fp.life * 1.5; p.color = {r:255, g:120 + 135*f, b:40*f}; } });
+            }
+            if (p.brightness < 0.05 && p.y < centerY + 60) { if (Math.sin(p.x * 0.3) * Math.cos(p.y * 0.3) > 0.9997) { p.brightness = 0.5; p.color={r:200, g:200, b:220} } }
+        }
+
+        function draw() {
+            if (isActive) {
+                ctx.fillStyle = "black"; ctx.fillRect(0, 0, width, height); update();
+                for (let i = 0; i < pixels.length; i++) { updatePixel(pixels[i]); pixels[i].draw(ctx); }
+            }
+            requestAnimationFrame(draw);
+        }
+
+        window.addEventListener('resize', initGrid);
+        window.sectionObservers['sec-19-20'] = {
+            onEnter: () => { isActive = true; stateTimer = 0; activeScene = 'mammals'; arrows = []; fireParticles =[]; showUI(-1); initGrid(); },
+            onLeave: () => { isActive = false; }
+        };
+        draw();
+    })();
+
+    /* =========================================================
+       CHAPTER 21 (21.html) - YOU (Overhauled with Dust Particles)
+       ========================================================= */
+    (function() {
+        const canvas = document.getElementById('canvas-21');
+        const ctx = canvas.getContext('2d');
+        const textContainer = document.getElementById('tc-21');
+        let isActive = false;
+        let width, height; let frame = 0;
+        let sceneState = 'narrative'; // 'narrative' -> 'deformation' -> 'white'
+        let currentTextIndex = 0; let narrativeTimeout;
+        let dustParticles = [];
+
+        const narrative =[ "You learned to build.<br>To communicate.<br>To record.", "You mapped the stars<br>that created you.", "You discovered the laws<br>that shaped everything.", "Out of all the chaos—<br>all the randomness—<br>all the time—", "you exist.", "Right now.", "Reading this.", "The universe didn’t owe you this.", "It didn’t plan for you.", "It didn’t guarantee anything.", "And yet—<br>against absurd odds—", "here you are.", "From nothing…<br>to something…", "to someone who can understand it.", "Out of billion possibilities where this entire world would be dead,<br>somehow the things do exist." ];
+
+        function init() {
+            width = window.innerWidth; height = window.innerHeight; canvas.width = width; canvas.height = height;
+            textContainer.innerHTML = '';
+            narrative.forEach((text, i) => {
+                const div = document.createElement('div'); div.className = 'text-element-21'; div.id = `s21-text-${i}`; div.innerHTML = text;
+                textContainer.appendChild(div);
+            });
+        }
+
+        function resetAndStart() {
+            clearTimeout(narrativeTimeout);
+            document.querySelectorAll('#tc-21 .text-element-21').forEach(el => el.classList.remove('active'));
+            frame = 0; sceneState = 'narrative'; currentTextIndex = 0; dustParticles = [];
+            startNarrative();
+        }
+
+        function triggerDeformation() {
+            sceneState = 'deformation';
+            // Processor heavy optimized array of minute black dust particles
+            let step = 4; // High density grid
+            let rows = Math.floor(height / step);
+            let cols = Math.floor(width / step);
+            
+            for(let r=0; r<rows; r++) {
+                for(let c=0; c<cols; c++) {
+                    // Start exactly on grid points representing the black screen
+                    dustParticles.push({
+                        x: c * step,
+                        y: r * step,
+                        vx: 0,
+                        vy: 0,
+                        life: 1.0,
+                        size: Math.random() * 1.5 + 1.0
+                    });
+                }
+            }
+        }
+
+        function startNarrative() {
+            if (currentTextIndex < narrative.length) {
+                const el = document.getElementById(`s21-text-${currentTextIndex}`);
+                
+                // Switch to dark text and trigger deformation on text 8 ("It didn't plan for you")
+                if (currentTextIndex >= 8) {
+                    el.classList.add('text-dark');
+                    if (sceneState === 'narrative') triggerDeformation();
+                }
+
+                el.classList.add('active');
+                
+                let delay = (currentTextIndex === 14) ? 5000 : 3200;
+                narrativeTimeout = setTimeout(() => { 
+                    el.classList.remove('active'); 
+                    currentTextIndex++; 
+                    narrativeTimeout = setTimeout(startNarrative, 1000); 
+                }, delay);
+            } else {
+                setTimeout(() => goToSection(9), 1000); // SLIDESHOW ADVANCE TO CONTACT
+            }
+        }
+
+        function loop() {
+            if (isActive) {
+                frame++;
+                
+                if (sceneState === 'narrative') {
+                    ctx.fillStyle = '#000'; ctx.fillRect(0, 0, width, height);
+                } 
+                else if (sceneState === 'deformation') {
+                    // Draw white background
+                    ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, width, height);
+                    
+                    ctx.fillStyle = '#000';
+                    let time = frame * 0.02;
+                    let cx = width/2, cy = height/2;
+                    let activeDust = 0;
+                    
+                    // Optimized batch drawing
+                    ctx.beginPath();
+                    for(let i = 0; i < dustParticles.length; i++) {
+                        let p = dustParticles[i];
+                        if (p.life <= 0) continue;
+                        activeDust++;
+                        
+                        let dx = p.x - cx; let dy = p.y - cy;
+                        let dist = Math.sqrt(dx*dx + dy*dy) || 1;
+                        
+                        // Cinematic vortex math
+                        p.vx += (dx / dist) * 0.2 + (dy / dist) * 0.1 + Math.sin(p.y * 0.005 + time)*0.15;
+                        p.vy += (dy / dist) * 0.2 - (dx / dist) * 0.1 + Math.cos(p.x * 0.005 + time)*0.15;
+                        p.vx *= 0.99; p.vy *= 0.99;
+                        
+                        p.x += p.vx;
+                        p.y += p.vy;
+                        
+                        if (p.x < 0 || p.x > width || p.y < 0 || p.y > height) p.life -= 0.02;
+                        
+                        ctx.rect(p.x, p.y, p.size, p.size);
+                    }
+                    ctx.fill();
+                    
+                    if (activeDust === 0) sceneState = 'white';
+                } 
+                else if (sceneState === 'white') {
+                    ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, width, height);
+                }
+            }
+            requestAnimationFrame(loop);
+        }
+
+        window.addEventListener('resize', () => { init(); });
+        window.sectionObservers['sec-21'] = {
+            onEnter: () => { isActive = true; init(); resetAndStart(); },
+            onLeave: () => { isActive = false; }
+        };
+        loop();
+    })();
+
+    /* =========================================================
+       CHAPTER 22 (22.html) - CONTACT
+       ========================================================= */
+    (function() {
+        const canvas = document.getElementById('canvas-22');
+        const ctx = canvas.getContext('2d');
+        const ui = document.getElementById('contact-ui');
+        let isActive = false;
+        let width, height; let particles = []; let pixels =[]; const GRID_SIZE = 12; const PARTICLE_COUNT = 8000;
+        const QUOTE = "I just wished that everyone knows how lucky they are to exist !";
+        let mouse = { x: -1000, y: -1000, active: false }; let frame = 0; let uiTimeout;
+
+        class Pixel {
+            constructor(x, y) { this.homeX = x; this.homeY = y; this.x = x; this.y = y; this.size = 1.5; }
+            update() {
+                let dx = mouse.x - this.x; let dy = mouse.y - this.y; let dist = Math.sqrt(dx*dx + dy*dy);
+                if (dist < 120) { let force = (120 - dist) / 120; let angle = Math.atan2(dy, dx); this.x -= Math.cos(angle) * force * 20; this.y -= Math.sin(angle) * force * 20; }
+                this.x += (this.homeX - this.x) * 0.08; this.y += (this.homeY - this.y) * 0.08;
+            }
+            draw() { ctx.fillStyle = 'rgba(0,0,0,0.1)'; ctx.fillRect(this.x, this.y, this.size, this.size); }
+        }
+
+        class DustParticle {
+            constructor() { this.reset(); }
+            reset() {
+                this.x = Math.random() * window.innerWidth; this.y = Math.random() * -window.innerHeight; this.targetX = this.x; this.targetY = this.y;
+                this.vx = (Math.random() - 0.5) * 2; this.vy = Math.random() * 2 + 1; this.size = Math.random() * 2 + 0.5;
+                this.alpha = 0; this.isText = false; this.friction = 0.95 + Math.random() * 0.04;
+            }
+            update() {
+                if (!this.isText) { this.x += this.vx; this.y += this.vy; this.alpha = Math.min(1, this.alpha + 0.01); if (this.y > height) this.y = -20; }
+                else { let dx = this.targetX - this.x; let dy = this.targetY - this.y; this.x += dx * 0.07; this.y += dy * 0.07; this.alpha = Math.min(1, this.alpha + 0.05); }
+            }
+            draw() { ctx.globalAlpha = this.alpha; ctx.fillStyle = '#000'; ctx.fillRect(this.x, this.y, this.size, this.size); ctx.globalAlpha = 1; }
+        }
+
+        function getTextPoints() {
+            const tempCanvas = document.createElement('canvas'); const tempCtx = tempCanvas.getContext('2d');
+            tempCanvas.width = width; tempCanvas.height = height; tempCtx.fillStyle = "#000"; tempCtx.font = "700 52px 'Caveat'"; tempCtx.textAlign = "center";
+            const words = QUOTE.split(' '); let lines =[]; let currentLine = ''; const maxWidth = width * 0.85;
+            for(let n = 0; n < words.length; n++) {
+                let testLine = currentLine + words[n] + ' '; let metrics = tempCtx.measureText(testLine);
+                if (metrics.width > maxWidth && n > 0) { lines.push(currentLine); currentLine = words[n] + ' '; } else { currentLine = testLine; }
+            }
+            lines.push(currentLine);
+            let startY = height / 2 - (lines.length * 30);
+            lines.forEach((line, i) => { tempCtx.fillText(line.trim(), width/2, startY + (i * 70)); });
+            const imageData = tempCtx.getImageData(0, 0, width, height).data; const points =[];
+            for (let y = 0; y < height; y += 2) { for (let x = 0; x < width; x += 2) { if (imageData[(y * width + x) * 4 + 3] > 128) points.push({ x, y }); } }
+            return points;
+        }
+
+        function init() {
+            clearTimeout(uiTimeout); ui.classList.remove('visible'); mouse.x = -1000; mouse.y = -1000;
+            width = window.innerWidth; height = window.innerHeight; canvas.width = width; canvas.height = height;
+            pixels =[]; for (let x = 0; x < width; x += GRID_SIZE) { for (let y = 0; y < height; y += GRID_SIZE) pixels.push(new Pixel(x, y)); }
+            particles = Array.from({ length: PARTICLE_COUNT }, () => new DustParticle());
+            uiTimeout = setTimeout(() => {
+                const textPoints = getTextPoints();
+                for (let i = 0; i < particles.length; i++) {
+                    const point = textPoints[i % textPoints.length];
+                    particles[i].targetX = point.x + (Math.random() - 0.5) * 2; particles[i].targetY = point.y + (Math.random() - 0.5) * 2; particles[i].isText = true;
+                }
+                uiTimeout = setTimeout(() => ui.classList.add('visible'), 2500);
+            }, 1000);
+        }
+
+        function loop() {
+            if (isActive) {
+                ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, width, height);
+                pixels.forEach(p => { p.update(); p.draw(); }); 
+                
+                // Optimization batch drawing for high-res particles
+                ctx.beginPath();
+                particles.forEach(p => { p.update(); ctx.rect(p.x, p.y, p.size, p.size); }); 
+                ctx.fillStyle = '#000'; ctx.fill();
+                frame++;
+            }
+            requestAnimationFrame(loop);
+        }
+
+        const handleInteraction = (e) => { const rect = canvas.getBoundingClientRect(); mouse.x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left; mouse.y = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top; };
+        window.addEventListener('mousemove', handleInteraction);
+        window.addEventListener('touchstart', (e) => { handleInteraction(e); if(e.target === canvas) e.preventDefault(); }, {passive: false});
+        window.addEventListener('touchmove', handleInteraction, {passive: false});
+        window.addEventListener('resize', init);
+        window.sectionObservers['sec-22'] = {
+            onEnter: () => { isActive = true; init(); },
+            onLeave: () => { isActive = false; }
+        };
+        loop();
+    })();
+
+</script>
+</body>
+</html>
