@@ -29,6 +29,4 @@ All presented through custom pixel-based animations and transitions.
 - Vanilla JavaScript
 - CSS3 Animations
 
-## 🚀 How to Run
-
-Just open the file in your browser:
+## Instagram: [@oneinagoogolplex._](https://instagram.com/oneinagoogolplex._)
