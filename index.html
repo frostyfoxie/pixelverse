@@ -45,6 +45,16 @@
 
         canvas { display: block; width: 100%; height: 100%; }
 
+        .window{
+            width:100%;
+            height:100%;
+            display: flex;
+            position: fixed;
+            align-content:center;
+            padding:0;
+            margin:0;
+        }
+
         /* --- SUBTLE SCENE NAVIGATOR --- */
         #scene-navigator {
             position: fixed;
@@ -198,7 +208,7 @@
     </style>
 </head>
 <body>
-<div>
+<div class="window">
     <!-- SCENE NAVIGATOR -->
     <div id="scene-navigator">
         <div class="nav-item active" onclick="goToSection(0)">Cosmos</div>
@@ -1680,7 +1690,7 @@
         };
         loop();
     })();
-</div>
+
 </script>
-</body>
+</div></body>
 </html>
