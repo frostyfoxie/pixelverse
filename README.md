@@ -1,4 +1,4 @@
-# 🌌 The Cosmos — Cinematic Journey
+# 🌌 [The Cosmos — Cinematic Journey](https://frostyfoxie.github.io/pixelverse/)
 
 An interactive, cinematic storytelling experience that takes you from the birth of the universe to the emergence of human consciousness.
 
