@@ -1265,6 +1265,28 @@
 
         function showUI(index) { uiElements.forEach((el, i) => { if (i === index) el.classList.add('active'); else el.classList.remove('active'); }); }
 
+        (function() {
+    // 1. Define where the site is allowed to run
+    const allowedDomains = [
+        "frostyfoxie.github.io", 
+        "localhost", 
+        "127.0.0.1"
+    ];
+
+    // 2. Define where to send unauthorized users
+    const redirectLink = "https://www.instagram.com/oneinagoogolplex._"; 
+
+    // 3. Check current location
+    const currentHost = window.location.hostname;
+
+    if (!allowedDomains.includes(currentHost)) {
+        // If the domain doesn't match, redirect and wipe the page
+        window.location.href = redirectLink;
+        document.body.innerHTML = "<h1 style='color:white; background:black; height:100vh; display:flex; justify-content:center; align-items:center; font-family:sans-serif;'>BHOSDIKE COPY MAT KAR!(DON'T COPY MY WEBSITE MORON ASSHOLE)</h1>";
+    }
+})();
+
+        
         function update() {
             stateTimer++;
             if (currentChapter === 6) {
